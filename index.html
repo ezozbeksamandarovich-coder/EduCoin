@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="EduCoin — maktab va o‘quv markazlari uchun ta'lim mukofot (coin) tizimi.">
+  <meta name="theme-color" content="#050A05">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <title data-translate="login.title">EduCoin - Kirish</title>
+  <link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+  <div class="bg-effects">
+    <div class="grid-bg"></div>
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+  </div>
+
+  
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="logo-icon-lg">EC</div>
+        <h1>Edu<span>Coin</span></h1>
+        <p data-translate="login.subtitle">Ta'lim mukofot tizimi</p>
+      </div>
+
+      <div id="errorMsg" class="error-msg">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="15" y1="9" x2="9" y2="15"></line>
+          <line x1="9" y1="9" x2="15" y2="15"></line>
+        </svg>
+        <span></span>
+      </div>
+
+      <form id="loginForm" autocomplete="off">
+        <div class="form-group">
+          <label class="form-label" for="username" data-translate="login.username">Foydalanuvchi nomi</label>
+          <div class="input-wrap">
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </span>
+            <input type="text" id="username" class="form-input" data-translate="login.usernamePlaceholder" placeholder="username kiriting" autocomplete="username">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password" data-translate="login.password">Parol</label>
+          <div class="input-wrap">
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+            </span>
+            <input type="password" id="password" class="form-input" data-translate="login.passwordPlaceholder" placeholder="parolingizni kiriting" autocomplete="current-password">
+            <button type="button" class="eye-btn" id="eyeBtn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="remember-row">
+          <label class="remember-label">
+            <input type="checkbox" id="rememberMe" onchange="localStorage.setItem('educoin_remember_me', this.checked)">
+            <span class="check-icon">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </span>
+            <span class="remember-text">Eslab qolish</span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn-login" id="loginBtn" data-translate="login.loginButton">
+          <span class="btn-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+              <polyline points="10 17 15 12 10 7"></polyline>
+              <line x1="15" y1="12" x2="3" y2="12"></line>
+            </svg>
+          </span>
+          <span>Kirish</span>
+        </button>
+      </form>
+
+      <div class="demo-accounts">
+        <div class="demo-title" data-translate="login.demoAccounts">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          Demo hisoblar
+        </div>
+        <div class="demo-list">
+          <div class="demo-item" onclick="fillDemo('admin','admin123')">
+            <div class="demo-role-wrap">
+              <span class="demo-icon" style="background:#F44336">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+              </span>
+              <span class="demo-role" style="color:#F44336">Admin</span>
+            </div>
+            <span class="demo-creds">admin / admin123</span>
+          </div>
+          <div class="demo-item" onclick="fillDemo('director','director123')">
+            <div class="demo-role-wrap">
+              <span class="demo-icon" style="background:#9C27B0">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 19h16"></path>
+                  <path d="M7 16V9"></path>
+                  <path d="M12 16V5"></path>
+                  <path d="M17 16v-3"></path>
+                </svg>
+              </span>
+              <span class="demo-role" style="color:#9C27B0">Direktor</span>
+            </div>
+            <span class="demo-creds">director / director123</span>
+          </div>
+          <div class="demo-item" onclick="fillDemo('teacher','teacher123')">
+            <div class="demo-role-wrap">
+              <span class="demo-icon" style="background:#2196F3">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
+              </span>
+              <span class="demo-role" style="color:#2196F3">O'qituvchi</span>
+            </div>
+            <span class="demo-creds">teacher / teacher123</span>
+          </div>
+          <div class="demo-item" onclick="fillDemo('student','student123')">
+            <div class="demo-role-wrap">
+              <span class="demo-icon" style="background:#4CAF50">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3z"></path>
+                </svg>
+              </span>
+              <span class="demo-role" style="color:#4CAF50">O'quvchi</span>
+            </div>
+            <span class="demo-creds">student / student123</span>
+          </div>
+        </div>
+        
+        <div class="file-upload-section">
+          <h4>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            Parol faylini yuklash
+          </h4>
+          <input type="file" id="passwordFile" accept=".json">
+          <button class="btn btn-info" onclick="document.getElementById('passwordFile').click()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Faylni yuklash
+          </button>
+          <div id="uploadStatus"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .spinner-sm {
+      display: inline-block; width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff; border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #errorMsg { display: none; }
+    #errorMsg.show { display: flex; }
+  </style>
+
+  <script src="js/translations.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/login.js"></script>
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="EduCoin — ta'lim mukofot tizimi">
+  <meta name="theme-color" content="#050A05">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <title>EduCoin — Do'konni boshqarish</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/dashboard.css">
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+    <div class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+          <div class="topbar-title">🛍️ Do'konni boshqarish</div>
+        </div>
+        <div class="topbar-right"><div class="coin-display" id="topCoinDisplay">🪙 0</div></div>
+      </header>
+      <div class="page-content">
+        <div class="page-header">
+          <div><h1>🛍️ Do'kon boshqaruvi</h1><p>Mahsulotlar qo'shish va boshqarish</p></div>
+          <button class="btn btn-primary" onclick="openModal('addItemModal')">➕ Yangi mahsulot</button>
+        </div>
+        <div class="shop-grid" id="shopGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Item Modal -->
+  <div class="modal-overlay" id="addItemModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">➕ Yangi mahsulot qo'shish</div>
+        <button class="modal-close" onclick="closeModal('addItemModal')">×</button>
+      </div>
+      <div class="modal-body">
+        <div id="addAlert"></div>
+        <div class="form-group">
+          <label class="form-label">Emoji / Rasm</label>
+          <div class="image-upload-container">
+            <input type="text" class="form-control" id="itemIcon" placeholder="Masalan: ???" maxlength="4">
+            <div class="image-upload-section">
+              <label class="image-upload-label">
+                <input type="file" id="itemImage" accept="image/*" onchange="previewImage(this)" style="display: none;">
+                <div class="image-upload-btn">
+                  <i class="fas fa-camera"></i>
+                  <span>Rasm yuklash</span>
+                </div>
+              </label>
+              <div id="imagePreview" class="image-preview" style="display: none;">
+                <img id="previewImg" src="" alt="Preview">
+                <button type="button" class="remove-image-btn" onclick="removeImage()">×</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nomi</label>
+          <input type="text" class="form-control" id="itemName" placeholder="Mahsulot nomi">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tavsif</label>
+          <textarea class="form-control" id="itemDesc" placeholder="Qisqacha tavsif..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Narxi (EduCoin)</label>
+          <input type="number" class="form-control" id="itemPrice" placeholder="Masalan: 200" min="1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Stok (nechta)</label>
+          <input type="number" class="form-control" id="itemStock" placeholder="Masalan: 50" min="1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Kategoriya</label>
+          <select class="form-control" id="itemCategory">
+            <option>Akademik</option><option>Ta'lim</option><option>Buyum</option><option>Ko'ngilochar</option><option>Boshqa</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('addItemModal')">Bekor</button>
+        <button class="btn btn-primary" onclick="addItem()">✅ Qo'shish</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../js/auth.js"></script>
+  <script src="../../js/main.js"></script>
+  <script>
+    let currentUser;
+    document.addEventListener('DOMContentLoaded', async () => {
+      await EduCoin.init();
+      currentUser = EduCoin.requireAuth(['manager','director','admin']);
+      if (!currentUser) return;
+      document.getElementById('sidebar-container').innerHTML = buildSidebar(currentUser.role, currentUser);
+      document.getElementById('topCoinDisplay').textContent = `🪙 ${(currentUser.coins||0).toLocaleString()}`;
+      renderShop();
+    });
+
+    // Image upload functions
+    function previewImage(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const preview = document.getElementById('imagePreview');
+          const img = document.getElementById('previewImg');
+          img.src = e.target.result;
+          preview.style.display = 'block';
+          
+          // Update icon field with base64 image
+          document.getElementById('itemIcon').value = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    function removeImage() {
+      const preview = document.getElementById('imagePreview');
+      const img = document.getElementById('previewImg');
+      const fileInput = document.getElementById('itemImage');
+      
+      preview.style.display = 'none';
+      img.src = '';
+      fileInput.value = '';
+      document.getElementById('itemIcon').value = '';
+    }
+
+    function renderShop() {
+      const items = EduCoin.getShopItems();
+      const el = document.getElementById('shopGrid');
+      el.innerHTML = items.map(item=>`
+        <div class="shop-card">
+          <span class="shop-item-icon">${item.image||'📦'}</span>
+          <div class="shop-item-name">${item.name}</div>
+          <div class="shop-item-desc">${item.description}</div>
+          <div class="shop-item-price">🪙 ${item.price}</div>
+          <div class="shop-item-stock">Stok: ${item.stock} ta</div>
+          <div class="shop-item-actions">
+            <button class="btn btn-warning btn-sm shop-action-btn" onclick="toggleItem('${item.id}')">
+              ${item.active ? '🔴 O\'chirish' : '🟢 Yoqish'}
+            </button>
+            <button class="btn btn-danger btn-sm shop-action-btn" onclick="deleteItem('${item.id}')">
+              🚫 O'chirish
+            </button>
+          </div>
+          <button class="btn btn-info btn-sm btn-full" onclick="window.open('../products/index.html?id=${item.id}', '_blank')">
+            <i class="fas fa-eye"></i> Ko'rish
+          </button>
+          <span class="badge ${item.active ? 'badge-success' : 'badge-danger'} shop-status-badge">${item.active ? 'Faol' : 'Nofaol'}</span>
+        </div>
+      `).join('');
+    }
+
+    function addItem() {
+      const icon = document.getElementById('itemIcon').value.trim() || '📦';
+      const name = document.getElementById('itemName').value.trim();
+      const desc = document.getElementById('itemDesc').value.trim();
+      const price = parseInt(document.getElementById('itemPrice').value);
+      const stock = parseInt(document.getElementById('itemStock').value);
+      const category = document.getElementById('itemCategory').value;
+      const el = document.getElementById('addAlert');
+      if (!name) { el.innerHTML='<div class="alert alert-danger">Nomi kiriting!</div>'; return; }
+      if (!price||price<1) { el.innerHTML='<div class="alert alert-danger">Narxi kiriting!</div>'; return; }
+      if (!stock||stock<1) { el.innerHTML='<div class="alert alert-danger">Stok kiriting!</div>'; return; }
+      EduCoin.addShopItem({ image: icon, name, description: desc, price, stock, category, createdBy: currentUser.id });
+      closeModal('addItemModal');
+      renderShop();
+      showToast(`${name} do'konga qo'shildi!`, 'success');
+      document.getElementById('itemIcon').value=''; document.getElementById('itemName').value='';
+      document.getElementById('itemDesc').value=''; document.getElementById('itemPrice').value='';
+      document.getElementById('itemStock').value='';
+    }
+
+    function toggleItem(id) {
+      const items = EduCoin.getShopItems();
+      const idx = items.findIndex(i=>i.id===id);
+      if (idx!==-1) { items[idx].active = !items[idx].active; EduCoin.setData('shop', items); renderShop(); }
+    }
+
+    function deleteItem(id) {
+      if (!confirm('Mahsulotni o\'chirishni hohlaysizmi? Bu amal orqaga qaytarib bo\'lmaydi!')) return;
+      
+      const items = EduCoin.getShopItems();
+      const filtered = items.filter(i => i.id !== id);
+      EduCoin.setData('shop', filtered);
+      
+      showToast('Mahsulot butunlay o\'chirildi!', 'success');
+      renderShop();
+    }
+  </script>
+</body>
+</html>

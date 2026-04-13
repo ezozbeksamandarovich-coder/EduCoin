@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="EduCoin — ta'lim mukofot tizimi">
+  <meta name="theme-color" content="#050A05">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <title>EduCoin - Teacher Dashboard</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/dashboard.css">
+</head>
+<body class="blur-on">
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+    <div class="main-content">
+      <header class="topbar">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button class="hamburger" id="dashboardHamburger" aria-label="Menyu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <div>
+            <div class="topbar-title" id="topbarTitle">O'qituvchi paneli</div>
+            <div style="font-size:12px;color:var(--text3);" id="topbarSubtitle"></div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="coin-display" id="topCoinDisplay">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M9.5 9.5c.5-1 2-1.5 3.5-.5s1.5 2.5.5 3.5-2.5 1-3.5.5"></path>
+              <path d="M12 8v8"></path>
+            </svg>
+            <span>0 coin</span>
+          </div>
+        </div>
+      </header>
+      <div class="page-content" id="dashboard-root"></div>
+    </div>
+  </div>
+
+  <script src="../../js/auth.js"></script>
+  <script src="../../js/main.js"></script>
+  <script src="../../js/role-dashboard.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => initRoleDashboard('teacher'));
+  </script>
+</body>
+</html>

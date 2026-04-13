@@ -1,0 +1,20 @@
+[
+  {
+    "id": "g001",
+    "name": "Frontend 1",
+    "teacherId": "u003",
+    "studentIds": ["u004", "u006", "u007"],
+    "schedule": "Du-Chor-Jum 16:00",
+    "level": "Intermediate",
+    "createdAt": "2024-01-15T00:00:00Z"
+  },
+  {
+    "id": "g002",
+    "name": "English Speaking",
+    "teacherId": "u011",
+    "studentIds": ["u008", "u009", "u010"],
+    "schedule": "Se-Pay-Shan 18:00",
+    "level": "Upper-Intermediate",
+    "createdAt": "2024-01-16T00:00:00Z"
+  }
+]

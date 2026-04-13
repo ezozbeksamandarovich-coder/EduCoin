@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="EduCoin — ta'lim mukofot tizimi">
+  <meta name="theme-color" content="#050A05">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <title>EduCoin — Coin yuborish</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/dashboard.css">
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+    <div class="main-content">
+      <header class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+          <div class="topbar-title">💸 Coin yuborish</div>
+        </div>
+        <div class="topbar-right">
+          <div class="coin-display" id="topCoinDisplay">🪙 0</div>
+        </div>
+      </header>
+      <div class="page-content">
+        <div class="page-header">
+          <div><h1>💸 EduCoin yuborish</h1><p>Boshqa o'quvchilarga coin ulashing</p></div>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <h3 class="form-title">Coin o'tkazish formasi</h3>
+            <div id="alertMsg"></div>
+
+            <div class="form-group">
+              <label class="form-label">Qabul qiluvchi o'quvchi</label>
+              <select class="form-control" id="toUser">
+                <option value="">— Tanlang —</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Miqdor (EduCoin)</label>
+              <input type="number" class="form-control" id="amount" placeholder="Masalan: 50" min="1">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Izoh (ixtiyoriy)</label>
+              <input type="text" class="form-control" id="reason" placeholder="Nima uchun yuborasiz?">
+            </div>
+            <button class="btn btn-primary btn-full btn-lg" onclick="sendCoins()">
+              💸 Yuborish
+            </button>
+          </div>
+
+          <div>
+            <div class="card balance-card">
+              <h3 class="balance-title">💼 Mening balanisim</h3>
+              <div class="balance-hero">
+                <div class="label">BALANS</div>
+                <div class="amount" id="myBalance">0</div>
+                <div class="sub">EduCoin</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3 class="history-title">📜 So'nggi o'tkazmalar</h3>
+              <div id="transferHistory"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="../../js/auth.js"></script>
+  <script src="../../js/main.js"></script>
+  <script>
+    let currentUser;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await EduCoin.init();
+      currentUser = EduCoin.requireAuth(['student']);
+      if (!currentUser) return;
+      document.getElementById('sidebar-container').innerHTML = buildSidebar('student', currentUser);
+      updateBalance();
+
+      const students = EduCoin.getUsersByRole('student').filter(u => u.id !== currentUser.id && u.active);
+      const sel = document.getElementById('toUser');
+      students.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.id;
+        opt.textContent = s.name;
+        sel.appendChild(opt);
+      });
+
+      renderTransferHistory();
+    });
+
+    function updateBalance() {
+      currentUser = EduCoin.getUserById(currentUser.id);
+      document.getElementById('topCoinDisplay').textContent = `🪙 ${currentUser.coins.toLocaleString()}`;
+      document.getElementById('myBalance').textContent = currentUser.coins.toLocaleString();
+    }
+
+    function renderTransferHistory() {
+      const txns = EduCoin.getUserTransactions(currentUser.id).filter(t => t.type === 'transfer').reverse().slice(0, 5);
+      const el = document.getElementById('transferHistory');
+      if (!txns.length) {
+        el.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>O\'tkazmalar yo\'q</p></div>';
+        return;
+      }
+      el.innerHTML = txns.map(t => {
+        const isSent = t.fromId === currentUser.id;
+        const other = EduCoin.getUserById(isSent ? t.toId : t.fromId);
+        return `<div class="txn-item">
+          <div class="txn-icon" style="background:${!isSent ? 'rgba(67,233,123,0.1)' : 'rgba(255,107,107,0.1)'}">💸</div>
+          <div class="txn-info">
+            <div class="txn-title">${isSent ? 'Yuborildi' : 'Qabul qilindi'}</div>
+            <div class="txn-sub">${other ? other.name : 'Noma\'lum'}</div>
+          </div>
+          <div>
+            <div class="txn-amount ${isSent ? 'negative' : 'positive'}">${isSent ? '-' : '+'}${t.amount} 🪙</div>
+            <div class="txn-date">${EduCoin.formatDate(t.createdAt)}</div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function sendCoins() {
+      const toId = document.getElementById('toUser').value;
+      const amount = parseInt(document.getElementById('amount').value);
+      const reason = document.getElementById('reason').value || 'Coin o\'tkazma';
+      const alertEl = document.getElementById('alertMsg');
+
+      if (!toId) { showAlert('Qabul qiluvchini tanlang!', 'danger'); return; }
+      if (!amount || amount < 1) { showAlert('Miqdorni kiriting!', 'danger'); return; }
+      if (amount > currentUser.coins) { showAlert('Balansingiz yetarli emas!', 'danger'); return; }
+
+      const result = EduCoin.transferCoins(currentUser.id, toId, amount, reason);
+      if (result.success) {
+        showAlert(`✅ ${amount} EduCoin muvaffaqiyatli yuborildi!`, 'success');
+        document.getElementById('toUser').value = '';
+        document.getElementById('amount').value = '';
+        document.getElementById('reason').value = '';
+        updateBalance();
+        renderTransferHistory();
+        showToast('Coin muvaffaqiyatli yuborildi!', 'success');
+      } else {
+        showAlert('❌ ' + result.msg, 'danger');
+      }
+    }
+
+    function showAlert(msg, type) {
+      const el = document.getElementById('alertMsg');
+      el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+      setTimeout(() => el.innerHTML = '', 4000);
+    }
+  </script>
+</body>
+</html>

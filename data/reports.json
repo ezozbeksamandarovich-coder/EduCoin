@@ -1,0 +1,15 @@
+[
+  {
+    "id": "r001",
+    "type": "monthly",
+    "title": "Mart 2024 Hisoboti",
+    "period": "2024-03",
+    "totalCoinsAwarded": 920,
+    "totalPurchases": 350,
+    "totalTransfers": 40,
+    "activeStudents": 6,
+    "activeTeachers": 2,
+    "createdBy": "u002",
+    "createdAt": "2024-03-31T23:59:00Z"
+  }
+]

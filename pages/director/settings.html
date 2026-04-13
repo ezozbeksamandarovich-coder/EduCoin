@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="EduCoin — ta'lim mukofot tizimi">
+  <meta name="theme-color" content="#050A05">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <title>EduCoin — Sozlamalar</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/dashboard.css">
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+    <div class="main-content">
+      <header class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+          <div class="topbar-title">⚙️ Sozlamalar</div>
+        </div>
+        <div class="topbar-right"><div class="coin-display" id="topCoinDisplay">🪙 0</div></div>
+      </header>
+      <div class="page-content">
+        <div class="page-header"><div><h1>⚙️ Tizim sozlamalari</h1><p>EduCoin platformasini sozlang</p></div></div>
+        <div class="grid grid-2">
+          <div class="card">
+            <h3 style="margin-bottom:20px">🏫 Platforma ma'lumotlari</h3>
+            <div id="settingsAlert"></div>
+            <div class="form-group">
+              <label class="form-label">Platforma nomi</label>
+              <input type="text" class="form-control" id="platformName" value="EduCoin">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Maqsad tavsifi</label>
+              <textarea class="form-control" id="platformDesc">Ta'lim mukofot tizimi</textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Eng yuqori kunlik limit (coin)</label>
+              <input type="number" class="form-control" id="dailyLimit" value="1000">
+            </div>
+            <button class="btn btn-primary btn-full" onclick="saveSettings()">💾 Saqlash</button>
+          </div>
+          <div class="card">
+            <h3 style="margin-bottom:20px">📊 Tizim holati</h3>
+            <div style="display:flex;flex-direction:column;gap:14px" id="systemStatus"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="../../js/auth.js"></script>
+  <script src="../../js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      await EduCoin.init();
+      const user = EduCoin.requireAuth(['director','admin']);
+      if (!user) return;
+      document.getElementById('sidebar-container').innerHTML = buildSidebar(user.role, user);
+      document.getElementById('topCoinDisplay').textContent = `🪙 ${(user.coins||0).toLocaleString()}`;
+
+      const settings = EduCoin.getData('settings') || {};
+      if (settings.platformName) document.getElementById('platformName').value = settings.platformName;
+      if (settings.platformDesc) document.getElementById('platformDesc').value = settings.platformDesc;
+      if (settings.dailyLimit) document.getElementById('dailyLimit').value = settings.dailyLimit;
+
+      const users = EduCoin.getUsers();
+      const txns = EduCoin.getTransactions();
+      const items = EduCoin.getShopItems();
+      document.getElementById('systemStatus').innerHTML = [
+        ['👥','Jami foydalanuvchilar', users.length + ' ta'],
+        ['🎒',"Faol o'quvchilar", EduCoin.getUsersByRole('student').filter(u=>u.active).length + ' ta'],
+        ['📚',"Faol o'qituvchilar", EduCoin.getUsersByRole('teacher').filter(u=>u.active).length + ' ta'],
+        ['🪙','Jami tranzaksiyalar', txns.length + ' ta'],
+        ['🛍️',"Do'kon mahsulotlari", items.length + ' ta'],
+        ['💾','LocalStorage holati', 'Ishlayapti ✅'],
+      ].map(([icon,label,val]) => `<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--text2)">${icon} ${label}</span>
+        <span style="font-weight:700">${val}</span>
+      </div>`).join('');
+    });
+
+    function saveSettings() {
+      EduCoin.setData('settings', {
+        platformName: document.getElementById('platformName').value,
+        platformDesc: document.getElementById('platformDesc').value,
+        dailyLimit: parseInt(document.getElementById('dailyLimit').value) || 1000,
+      });
+      document.getElementById('settingsAlert').innerHTML = '<div class="alert alert-success">✅ Sozlamalar saqlandi!</div>';
+      showToast('Sozlamalar saqlandi!', 'success');
+      setTimeout(() => document.getElementById('settingsAlert').innerHTML='', 3000);
+    }
+  </script>
+</body>
+</html>

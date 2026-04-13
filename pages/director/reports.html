@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="EduCoin — ta'lim mukofot tizimi">
+  <meta name="theme-color" content="#050A05">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <title>EduCoin — Hisobotlar</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/dashboard.css">
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+    <div class="main-content">
+      <header class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+          <div class="topbar-title">📊 Hisobotlar</div>
+        </div>
+        <div class="topbar-right"><div class="coin-display" id="topCoinDisplay">🪙 0</div></div>
+      </header>
+      <div class="page-content">
+        <div class="page-header">
+          <div><h1>📊 Hisobotlar</h1><p>Tizim statistikasi va tahlil</p></div>
+          <button class="btn btn-primary" onclick="generateReport()">📄 Hisobot yaratish</button>
+        </div>
+
+        <div class="grid grid-4" style="margin-bottom:24px">
+          <div class="stat-card"><div class="stat-icon" style="background:rgba(255,215,0,0.15)">🪙</div><div class="stat-info"><div class="label">Jami coinlar</div><div class="value" id="s1">0</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:rgba(67,233,123,0.15)">🎒</div><div class="stat-info"><div class="label">Faol o'quvchilar</div><div class="value" id="s2">0</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:rgba(33,150,243,0.15)">📚</div><div class="stat-info"><div class="label">Faol o'qituvchilar</div><div class="value" id="s3">0</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:rgba(255,107,107,0.15)">🛒</div><div class="stat-info"><div class="label">Jami xaridlar</div><div class="value" id="s4">0</div></div></div>
+        </div>
+
+        <div class="card" style="margin-bottom:20px">
+          <h3 style="margin-bottom:16px">📈 Tranzaksiya statistikasi</h3>
+          <div class="grid grid-3">
+            <div style="text-align:center;padding:20px;background:var(--bg3);border-radius:12px">
+              <div style="font-size:32px;font-weight:800;color:var(--success);font-family:'Space Mono',monospace" id="totalAward">0</div>
+              <div style="font-size:12px;color:var(--text3);margin-top:6px">🎁 Berilgan coinlar</div>
+            </div>
+            <div style="text-align:center;padding:20px;background:var(--bg3);border-radius:12px">
+              <div style="font-size:32px;font-weight:800;color:var(--warning);font-family:'Space Mono',monospace" id="totalTransfer">0</div>
+              <div style="font-size:12px;color:var(--text3);margin-top:6px">💸 O'tkazmalar</div>
+            </div>
+            <div style="text-align:center;padding:20px;background:var(--bg3);border-radius:12px">
+              <div style="font-size:32px;font-weight:800;color:var(--danger);font-family:'Space Mono',monospace" id="totalPurchase">0</div>
+              <div style="font-size:12px;color:var(--text3);margin-top:6px">🛒 Xarid summasi</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-bottom:16px">📋 Saqlangan hisobotlar</h3>
+          <div id="reportsList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="../../js/auth.js"></script>
+  <script src="../../js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      await EduCoin.init();
+      const user = EduCoin.requireAuth(['manager','director','admin']);
+      if (!user) return;
+      document.getElementById('sidebar-container').innerHTML = buildSidebar(user.role, user);
+      document.getElementById('topCoinDisplay').textContent = `🪙 ${(user.coins||0).toLocaleString()}`;
+      loadStats();
+    });
+
+    function loadStats() {
+      const txns = EduCoin.getTransactions();
+      const purchases = EduCoin.getData('purchases')||[];
+      document.getElementById('s1').textContent = txns.filter(t=>t.type==='award').reduce((s,t)=>s+t.amount,0).toLocaleString();
+      document.getElementById('s2').textContent = EduCoin.getUsersByRole('student').filter(u=>u.active).length;
+      document.getElementById('s3').textContent = EduCoin.getUsersByRole('teacher').filter(u=>u.active).length;
+      document.getElementById('s4').textContent = purchases.length;
+      document.getElementById('totalAward').textContent = txns.filter(t=>t.type==='award').reduce((s,t)=>s+t.amount,0).toLocaleString();
+      document.getElementById('totalTransfer').textContent = txns.filter(t=>t.type==='transfer').reduce((s,t)=>s+t.amount,0).toLocaleString();
+      document.getElementById('totalPurchase').textContent = Math.abs(txns.filter(t=>t.type==='purchase').reduce((s,t)=>s+t.amount,0)).toLocaleString();
+      renderReports();
+    }
+
+    function renderReports() {
+      const reports = EduCoin.getReports().reverse();
+      const el = document.getElementById('reportsList');
+      if (!reports.length) { el.innerHTML='<div class="empty-state"><div class="icon">📄</div><p>Hali hisobot yo\'q. "Hisobot yaratish" tugmasini bosing.</p></div>'; return; }
+      el.innerHTML = `<div class="table-wrap"><table>
+        <thead><tr><th>Sarlavha</th><th>Berilgan</th><th>Xaridlar</th><th>O'quvchilar</th><th>Sana</th></tr></thead>
+        <tbody>${reports.map(r=>`<tr>
+          <td style="font-weight:600">${r.title}</td>
+          <td><span style="color:var(--success);font-weight:700">${(r.totalCoinsAwarded||0).toLocaleString()} 🪙</span></td>
+          <td><span style="color:var(--warning);font-weight:700">${(r.totalPurchases||0).toLocaleString()} 🪙</span></td>
+          <td>${r.activeStudents||0} ta</td>
+          <td style="color:var(--text3)">${EduCoin.formatDate(r.createdAt)}</td>
+        </tr>`).join('')}</tbody>
+      </table></div>`;
+    }
+
+    function generateReport() {
+      EduCoin.generateReport();
+      loadStats();
+      showToast('📊 Hisobot muvaffaqiyatli yaratildi!', 'success');
+    }
+  </script>
+</body>
+</html>

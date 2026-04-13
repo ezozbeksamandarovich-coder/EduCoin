@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="EduCoin — ta'lim mukofot tizimi">
+  <meta name="theme-color" content="#050A05">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <title data-translate="database.title">EduCoin — Database</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/dashboard.css">
+  <style>
+    .db-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      animation: slideIn 0.5s ease;
+      transition: all 0.3s ease;
+    }
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0,255,136,0.2);
+      border-color: var(--primary-color);
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .table-wrap {
+      overflow-x: auto;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .search-box {
+      margin-bottom: 15px;
+      position: relative;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 10px 40px 10px 15px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--input-bg);
+      color: var(--text);
+      font-size: 14px;
+    }
+    .search-box::after {
+      content: "🔍";
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text2);
+    }
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .btn-small {
+      padding: 4px 8px;
+      font-size: 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-edit { background: var(--warning); color: white; }
+    .btn-delete { background: var(--danger); color: white; }
+    .btn-view { background: var(--primary-color); color: white; }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+    <div class="main-content">
+      <header class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+          <div class="topbar-title">🗄️ Database</div>
+        </div>
+        <div class="topbar-right"><span class="badge badge-danger">ADMIN</span></div>
+      </header>
+      <div class="page-content">
+        <div class="page-header">
+          <div><h1 data-translate="database.title">Database Management</h1><p data-translate="database.subtitle">Manage all system data</p></div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-primary" onclick="exportData()">� Export</button>
+            <button class="btn btn-info" onclick="importData()">� Import</button>
+            <button class="btn btn-warning" onclick="optimizeDatabase()">🔧 Optimize</button>
+            <button class="btn btn-danger" onclick="resetDatabase()">🔄 Reset</button>
+          </div>
+        </div>
+
+        <div class="db-stats" id="dbStats"></div>
+
+        <div class="alert alert-info" style="margin-bottom:20px">
+          ℹ️ <span data-translate="database.info">Barcha ma'lumotlar brauzerning LocalStorage'ida saqlanmoqda. Export qilib JSON fayl sifatida saqlash mumkin.</span>
+        </div>
+
+        <div class="tabs" style="margin-bottom:20px">
+          <button class="tab-btn active" onclick="showTab('users',this)">👥 Users</button>
+          <button class="tab-btn" onclick="showTab('coins',this)">🪙 Coins</button>
+          <button class="tab-btn" onclick="showTab('shop',this)">🛍️ Shop</button>
+          <button class="tab-btn" onclick="showTab('groups',this)">👥 Groups</button>
+          <button class="tab-btn" onclick="showTab('purchases',this)">🛒 Purchases</button>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <h3 id="tableTitle">👥 Users</h3>
+            <div style="display:flex;gap:10px;align-items:center">
+              <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Qidirish..." onkeyup="filterData()">
+              </div>
+              <span class="badge badge-primary" id="recordCount">0 ta yozuv</span>
+            </div>
+          </div>
+          <div id="tableContainer"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="../../js/translations.js"></script>
+  <script src="../../js/auth.js"></script>
+  <script src="../../js/main.js"></script>
+  <script>
+    let currentTab = 'users';
+    let currentLang = 'uz';
+    let allData = {};
+    
+    document.addEventListener('DOMContentLoaded', async () => {
+      await EduCoin.init();
+      const user = EduCoin.requireAuth(['admin']);
+      if (!user) return;
+      
+      // Load language settings
+      const langSettings = EduCoin.getData('langSettings') || {};
+      currentLang = langSettings.language || 'uz';
+      applyTranslations(currentLang);
+      
+      document.getElementById('sidebar-container').innerHTML = buildSidebar('admin', user);
+      updateDbStats();
+      showTab('users', document.querySelector('.tab-btn'));
+    });
+
+    function showTab(tab, btn) {
+      currentTab = tab;
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const data = EduCoin.getData(tab) || [];
+      allData[tab] = data;
+      document.getElementById('recordCount').textContent = data.length + ' ta yozuv';
+      const icons = {users:'👥',coins:'🪙',shop:'🛍️',groups:'👥',purchases:'🛒'};
+      document.getElementById('tableTitle').textContent = `${icons[tab]||'📋'} ${tab.charAt(0).toUpperCase()+tab.slice(1)}`;
+
+      if (!data.length) {
+        document.getElementById('tableContainer').innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>Ma\'lumot yo\'q</p></div>';
+        return;
+      }
+      renderTable(data);
+    }
+
+    function renderTable(data) {
+      const keys = Object.keys(data[0]);
+      document.getElementById('tableContainer').innerHTML = `
+        <div class="table-wrap">
+          <table>
+            <thead><tr>${keys.map(k=>`<th>${k}</th>`).join('')}</tr></thead>
+            <tbody>${data.map((row, index)=>`<tr>${keys.map(k=>{
+              const val = row[k];
+              const str = typeof val === 'object' ? JSON.stringify(val) : String(val||'—');
+              return `<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px" title="${str}">${str}</td>`;
+            }).join('')}</tr>`).join('')}</tbody>
+          </table>
+        </div>`;
+    }
+
+    function filterData() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const data = allData[currentTab] || [];
+      
+      if (!searchTerm) {
+        renderTable(data);
+        return;
+      }
+      
+      const filtered = data.filter(row => {
+        return Object.values(row).some(val => {
+          const str = typeof val === 'object' ? JSON.stringify(val) : String(val||'');
+          return str.toLowerCase().includes(searchTerm);
+        });
+      });
+      
+      document.getElementById('recordCount').textContent = filtered.length + ' ta yozuv (filtrlangan)';
+      renderTable(filtered);
+    }
+
+    function updateDbStats() {
+      const tables = ['users', 'coins', 'shop', 'groups', 'purchases', 'reports'];
+      const statsHtml = tables.map(table => {
+        const data = EduCoin.getData(table) || [];
+        const size = JSON.stringify(data).length;
+        const icons = {users:'👥',coins:'🪙',shop:'🛍️',groups:'👥',purchases:'🛒',reports:'📊'};
+        return `
+          <div class="stat-card">
+            <div style="font-size: 24px; margin-bottom: 8px;">${icons[table]}</div>
+            <div style="font-size: 14px; color: var(--text2);">${table.charAt(0).toUpperCase()+table.slice(1)}</div>
+            <div style="font-size: 20px; font-weight: 700;">${data.length} ta</div>
+            <div style="font-size: 12px; color: var(--text2);">${(size/1024).toFixed(1)} KB</div>
+          </div>
+        `;
+      }).join('');
+      
+      document.getElementById('dbStats').innerHTML = statsHtml;
+    }
+
+    function importData() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const data = JSON.parse(event.target.result);
+            Object.keys(data).forEach(key => {
+              if (data[key]) {
+                EduCoin.setData(key, data[key]);
+              }
+            });
+            showToast('Ma\'lumotlar muvaffaqiyatli import qilindi!', 'success');
+            updateDbStats();
+            showTab(currentTab, document.querySelector('.tab-btn.active'));
+          } catch (error) {
+            showToast('Xatolik! Noto\'g\'ri JSON fayl.', 'error');
+          }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    }
+
+    function optimizeDatabase() {
+      const tables = ['users', 'coins', 'shop', 'groups', 'purchases', 'reports'];
+      let optimized = 0;
+      
+      tables.forEach(table => {
+        const data = EduCoin.getData(table) || [];
+        if (data.length > 0) {
+          // Remove duplicates and clean data
+          const cleaned = data.filter((item, index, self) => 
+            index === self.findIndex(t => t.id === item.id)
+          );
+          EduCoin.setData(table, cleaned);
+          optimized += data.length - cleaned.length;
+        }
+      });
+      
+      showToast(`Database optimizatsiya qilindi! ${optimized} ta dublikat o'chirildi.`, 'success');
+      updateDbStats();
+      showTab(currentTab, document.querySelector('.tab-btn.active'));
+    }
+
+    function exportData() {
+      const all = {};
+      ['users','coins','shop','groups','purchases','reports'].forEach(k => all[k] = EduCoin.getData(k)||[]);
+      const blob = new Blob([JSON.stringify(all, null, 2)], {type:'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `educoin_backup_${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      showToast('Ma\'lumotlar export qilindi!', 'success');
+    }
+
+    function importData() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const data = JSON.parse(event.target.result);
+            
+            // Validate data structure
+            if (!data.users || !Array.isArray(data.users)) {
+              showToast('Xato JSON format! Users array topilmadi.', 'error');
+              return;
+            }
+            
+            // Import users
+            if (confirm(`${data.users.length} ta foydalanuvchi import qilinsizmi?`)) {
+              EduCoin.setData('users', data.users);
+              showToast(`${data.users.length} ta foydalanuvchi muvaffaqiyatli import qilindi!`, 'success');
+              renderTable('users');
+            }
+            
+            // Import other data
+            ['coins','shop','groups','purchases','reports'].forEach(key => {
+              if (data[key]) {
+                EduCoin.setData(key, data[key]);
+              }
+            });
+            
+            updateDbStats();
+          } catch (error) {
+            showToast('JSON faylini o\'qib bo\'lishda xatolik yuz berdi!', 'error');
+          }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    }
+
+    function optimizeDatabase() {
+      if (!confirm('Database optimallashtirilsinmi? Bu jarayon bekor qilib bo\'lmaydi!')) return;
+      
+      const users = EduCoin.getUsers();
+      const coins = EduCoin.getTransactions();
+      const shop = EduCoin.getShopItems();
+      const groups = EduCoin.getData('groups') || [];
+      
+      // Optimize users data
+      const optimizedUsers = users.map(user => ({
+        ...user,
+        coins: user.coins || 0,
+        active: user.active !== false
+      }));
+      
+      // Remove duplicates
+      const uniqueUsers = optimizedUsers.filter((user, index, self) => 
+        index === self.findIndex(u => u.id === user.id)
+      );
+      
+      // Update data
+      EduCoin.setData('users', uniqueUsers);
+      
+      // Optimize transactions
+      const optimizedCoins = coins.filter(tx => tx.amount && tx.from && tx.to);
+      EduCoin.setData('coins', optimizedCoins);
+      
+      showToast('Database muvaffaqiyatli optimallashtirildi!', 'success');
+      updateDbStats();
+      renderTable('users');
+    }
+
+    function resetDatabase() {
+      if (!confirm('⚠️ BARCHA MA\'LUMOTLAR O\'CHIRILADI! Tasdiqlaysizmi?')) return;
+      if (!confirm('Haqiqatan ham siz ishonchingiz komilmi?')) return;
+      ['users','coins','shop','groups','purchases','reports','initialized'].forEach(k => {
+        localStorage.removeItem(`educoin_${k}`);
+      });
+      showToast('Database tozalandi! Sahifa yangilanmoqda...', 'info');
+      setTimeout(() => window.location.href='../../index.html', 2000);
+    }
+  </script>
+</body>
+</html>

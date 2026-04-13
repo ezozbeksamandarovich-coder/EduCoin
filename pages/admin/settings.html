@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="EduCoin — ta'lim mukofot tizimi">
+  <meta name="theme-color" content="#050A05">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <title>EduCoin — Sozlamalar</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/dashboard.css">
+  <style>
+    .radio-group { display: flex; flex-direction: column; gap: 8px; }
+    .radio-label {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px; cursor: pointer; transition: all 0.2s;
+    }
+    .radio-label:hover {
+      background: rgba(0,255,136,0.05);
+      border-color: rgba(0,255,136,0.3);
+      transform: translateX(3px);
+    }
+    .radio-label input[type="radio"] { margin: 0; accent-color: var(--primary); }
+    .radio-label input[type="radio"]:checked + span { font-weight: 700; color: var(--primary); }
+    .radio-label:has(input[type="radio"]:checked) {
+      background: rgba(0,255,136,0.08);
+      border-color: rgba(0,255,136,0.4);
+      box-shadow: 0 0 10px rgba(0,255,136,0.1);
+    }
+    #colorPreview { transition: all 0.3s ease; }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+    <div class="main-content">
+      <header class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+          <div class="topbar-title">⚙️ Sozlamalar</div>
+        </div>
+        <div class="topbar-right"><div class="coin-display" id="topCoinDisplay">🪙 0</div></div>
+      </header>
+      <div class="page-content">
+        <div class="page-header"><div><h1>⚙️ Tizim sozlamalari</h1><p>EduCoin platformasini sozlang</p></div></div>
+        <div class="grid grid-2">
+          <div class="card">
+            <h3 style="margin-bottom:20px">🏫 Platforma ma'lumotlari</h3>
+            <div id="settingsAlert"></div>
+            <div class="form-group">
+              <label class="form-label">Platforma nomi</label>
+              <input type="text" class="form-control" id="platformName" value="EduCoin">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Maqsad tavsifi</label>
+              <textarea class="form-control" id="platformDesc">Ta'lim mukofot tizimi</textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Eng yuqori kunlik limit (coin)</label>
+              <input type="number" class="form-control" id="dailyLimit" value="1000">
+            </div>
+            <button class="btn btn-primary btn-full" onclick="saveSettings()">💾 Saqlash</button>
+          </div>
+          <div class="card">
+            <h3 style="margin-bottom:20px">📊 Tizim holati</h3>
+            <div style="display:flex;flex-direction:column;gap:14px" id="systemStatus"></div>
+          </div>
+        </div>
+
+        <div class="grid grid-2" style="margin-top:24px">
+          <div class="card">
+            <h3 style="margin-bottom:20px">🎨 Interfeys sozlamalari</h3>
+            <div id="uiSettingsAlert"></div>
+            <div class="form-group">
+              <label class="form-label">Blur effekti</label>
+              <div class="radio-group">
+                <label class="radio-label">
+                  <input type="radio" name="blur" value="on" onchange="applyUISettings(this.value, document.getElementById('colorTheme').value)">
+                  <span>🌟 Blur yoqilgan (Yashil glow)</span>
+                </label>
+                <label class="radio-label">
+                  <input type="radio" name="blur" value="heavy" onchange="applyUISettings(this.value, document.getElementById('colorTheme').value)">
+                  <span>✨ Kuchli blur effekti</span>
+                </label>
+                <label class="radio-label">
+                  <input type="radio" name="blur" value="off" onchange="applyUISettings(this.value, document.getElementById('colorTheme').value)">
+                  <span>🚫 Blur o'chirilgan</span>
+                </label>
+                <label class="radio-label">
+                  <input type="radio" name="blur" value="black" onchange="applyUISettings(this.value, document.getElementById('colorTheme').value)">
+                  <span>⚫ Qora fon</span>
+                </label>
+                <label class="radio-label">
+                  <input type="radio" name="blur" value="white" onchange="applyUISettings(this.value, document.getElementById('colorTheme').value)">
+                  <span>⚪ Oq fon</span>
+                </label>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Rang mavzusi</label>
+              <div style="display:grid;grid-template-columns: 1fr 1fr;gap:10px;">
+                <select class="form-control" id="colorTheme" onchange="applyUISettings(document.querySelector('input[name=blur]:checked').value, this.value); updateColorPreview(this.value)">
+                  <option value="green">🟢 Yashil (asosiy)</option>
+                  <option value="blue">🔵 Ko'k</option>
+                  <option value="purple">🟣 Binafsha</option>
+                  <option value="red">🔴 Qizil</option>
+                  <option value="orange">🟠 To'q sariq</option>
+                  <option value="pink">🩷 Pushti</option>
+                  <option value="teal">🟦 Moviy</option>
+                  <option value="indigo">🟦 Indigo</option>
+                </select>
+                <div id="colorPreview" style="height:40px;border-radius:8px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;"></div>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-full" onclick="saveUISettings()">💾 Interfeys saqlash</button>
+          </div>
+          <div class="card">
+            <h3 style="margin-bottom:20px">🌐 Til sozlamalari</h3>
+            <div id="langSettingsAlert"></div>
+            <div class="form-group">
+              <label class="form-label">Interfeys tili</label>
+              <select class="form-control" id="language">
+                <option value="uz">🇺🇿 O'zbekcha</option>
+                <option value="en">🇬🇧 English</option>
+                <option value="ru">🇷🇺 Русский</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Vaqt zonasi</label>
+              <select class="form-control" id="timezone">
+                <option value="Tashkent">🇺🇿 Toshkent (UTC+5)</option>
+                <option value="Moscow">🇷🇺 Moskva (UTC+3)</option>
+                <option value="London">🇬🇧 London (UTC+0)</option>
+                <option value="NewYork">🇺🇸 New York (UTC-5)</option>
+              </select>
+            </div>
+            <button class="btn btn-primary btn-full" onclick="saveLanguageSettings()">💾 Til sozlamalarini saqlash</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="../../js/auth.js"></script>
+  <script src="../../js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      await EduCoin.init();
+      const user = EduCoin.requireAuth(['director','admin']);
+      if (!user) return;
+      document.getElementById('sidebar-container').innerHTML = buildSidebar(user.role, user);
+      document.getElementById('topCoinDisplay').textContent = `🪙 ${(user.coins||0).toLocaleString()}`;
+
+      const settings = EduCoin.getData('settings') || {};
+      if (settings.platformName) document.getElementById('platformName').value = settings.platformName;
+      if (settings.platformDesc) document.getElementById('platformDesc').value = settings.platformDesc;
+      if (settings.dailyLimit) document.getElementById('dailyLimit').value = settings.dailyLimit;
+
+      // Load UI settings
+      const uiSettings = EduCoin.getData('uiSettings') || { blur: 'on', colorTheme: 'green' };
+      const blurVal = uiSettings.blur || 'on';
+      const blurRadio = document.querySelector(`input[name="blur"][value="${blurVal}"]`);
+      if (blurRadio) blurRadio.checked = true;
+      const theme = uiSettings.colorTheme || 'green';
+      document.getElementById('colorTheme').value = theme;
+      updateColorPreview(theme);
+
+
+      // Load language settings
+      const langSettings = EduCoin.getData('langSettings') || {};
+      if (langSettings.language) document.getElementById('language').value = langSettings.language;
+      if (langSettings.timezone) document.getElementById('timezone').value = langSettings.timezone;
+
+      const users = EduCoin.getUsers();
+      const txns = EduCoin.getTransactions();
+      const items = EduCoin.getShopItems();
+      document.getElementById('systemStatus').innerHTML = [
+        ['👥','Jami foydalanuvchilar', users.length + ' ta'],
+        ['🎒',"Faol o'quvchilar", EduCoin.getUsersByRole('student').filter(u=>u.active).length + ' ta'],
+        ['📚',"Faol o'qituvchilar", EduCoin.getUsersByRole('teacher').filter(u=>u.active).length + ' ta'],
+        ['🪙','Jami tranzaksiyalar', txns.length + ' ta'],
+        ['🛍️',"Do'kon mahsulotlari", items.length + ' ta'],
+        ['💾','LocalStorage holati', 'Ishlayapti ✅'],
+      ].map(([icon,label,val]) => `<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--text2)">${icon} ${label}</span>
+        <span style="font-weight:700">${val}</span>
+      </div>`).join('');
+    });
+
+    function saveSettings() {
+      EduCoin.setData('settings', {
+        platformName: document.getElementById('platformName').value,
+        platformDesc: document.getElementById('platformDesc').value,
+        dailyLimit: parseInt(document.getElementById('dailyLimit').value) || 1000,
+      });
+      document.getElementById('settingsAlert').innerHTML = '<div class="alert alert-success">✅ Sozlamalar saqlandi!</div>';
+      showToast('Sozlamalar saqlandi!', 'success');
+      setTimeout(() => document.getElementById('settingsAlert').innerHTML='', 3000);
+    }
+
+    function saveUISettings() {
+      const blurValue = document.querySelector('input[name="blur"]:checked').value;
+      const colorTheme = document.getElementById('colorTheme').value;
+      
+      EduCoin.setData('uiSettings', {
+        blur: blurValue,
+        colorTheme: colorTheme
+      });
+      
+      // Apply UI changes immediately using global function
+      applyUISettings(blurValue, colorTheme);
+      updateColorPreview(colorTheme);
+      
+      document.getElementById('uiSettingsAlert').innerHTML = '<div class="alert alert-success">✅ Interfeys sozlamalari saqlandi!</div>';
+      showToast('Interfeys sozlamalari saqlandi!', 'success');
+      setTimeout(() => document.getElementById('uiSettingsAlert').innerHTML='', 3000);
+    }
+
+    function saveLanguageSettings() {
+      const language = document.getElementById('language').value;
+      const timezone = document.getElementById('timezone').value;
+      
+      EduCoin.setData('langSettings', {
+        language: language,
+        timezone: timezone
+      });
+      
+      document.getElementById('langSettingsAlert').innerHTML = '<div class="alert alert-success">✅ Til sozlamalari saqlandi!</div>';
+      showToast('Til sozlamalari saqlandi!', 'success');
+      setTimeout(() => document.getElementById('langSettingsAlert').innerHTML='', 3000);
+    }
+
+    function updateColorPreview(colorTheme) {
+      const colors = {
+        green: { primary: '#00FF88', secondary: '#00CC66', accent: '#00FFAA' },
+        blue: { primary: '#2196F3', secondary: '#1976D2', accent: '#64B5F6' },
+        purple: { primary: '#9C27B0', secondary: '#7B1FA2', accent: '#BA68C8' },
+        red: { primary: '#F44336', secondary: '#D32F2F', accent: '#EF5350' },
+        orange: { primary: '#FF9800', secondary: '#F57C00', accent: '#FFB74D' },
+        pink: { primary: '#FF69B4', secondary: '#FF1493', accent: '#FF4081' },
+        teal: { primary: '#00BCD4', secondary: '#0097A7', accent: '#00E5CC' },
+        indigo: { primary: '#6366F1', secondary: '#4F46E5', accent: '#818CF8' }
+      };
+      const c = colors[colorTheme] || colors.green;
+      const preview = document.getElementById('colorPreview');
+      if (preview) {
+        preview.style.background = `linear-gradient(135deg, ${c.primary}, ${c.secondary})`;
+        preview.innerHTML = `<div style="display:flex;align-items:center;gap:6px">
+          <div style="width:18px;height:18px;background:${c.primary};border-radius:50%;box-shadow:0 0 8px ${c.primary}66"></div>
+          <div style="width:18px;height:18px;background:${c.secondary};border-radius:50%"></div>
+          <div style="width:18px;height:18px;background:${c.accent};border-radius:50%"></div>
+        </div>`;
+      }
+    }
+  </script>
+</body>
+</html>

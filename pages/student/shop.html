@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="EduCoin — ta'lim mukofot tizimi">
+  <meta name="theme-color" content="#050A05">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <title>EduCoin — Do'kon</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/dashboard.css">
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+    <div class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')" aria-label="Menyu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <div class="topbar-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 8px;">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <path d="M16 10a4 4 0 0 1-8 0"></path>
+            </svg>
+            Do'kon
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="coin-display" id="topCoinDisplay">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M9.5 9.5c.5-1 2-1.5 3.5-.5s1.5 2.5.5 3.5-2.5 1-3.5.5"></path>
+              <path d="M12 8v8"></path>
+            </svg>
+            <span>0</span>
+          </div>
+        </div>
+      </header>
+      <div class="page-content">
+        <div class="page-header">
+          <div>
+            <h1>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 10px; color: var(--primary);">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <path d="M16 10a4 4 0 0 1-8 0"></path>
+              </svg>
+              Do'kon
+            </h1>
+            <p>EduCoinlaringizni foydali narsalarga almashtiring</p>
+          </div>
+        </div>
+
+        <div class="search-bar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.35-4.35"></path>
+          </svg>
+          <input type="text" id="searchInput" placeholder="Mahsulot qidirish..." oninput="filterShop(this.value)">
+        </div>
+
+        <div class="shop-grid" id="shopGrid">
+          <div class="spinner"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Purchase Modal -->
+  <div class="modal-overlay" id="buyModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 8px;">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+          Xarid tasdiqlash
+        </div>
+        <button class="modal-close" onclick="closeModal('buyModal')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="buyItemInfo" class="buy-item-info">
+          <div id="buyItemIcon" class="buy-item-icon"></div>
+          <h3 id="buyItemName" class="buy-item-name"></h3>
+          <p id="buyItemDesc" class="buy-item-desc"></p>
+          <div class="buy-price-info">
+            <div style="text-align:center">
+              <div class="price-label">NARX</div>
+              <div id="buyItemPrice" class="price-value"></div>
+            </div>
+            <div style="text-align:center">
+              <div class="price-label">BALANSINGIZ</div>
+              <div id="buyUserBalance" class="price-value balance-color"></div>
+            </div>
+          </div>
+          <div id="buyAfterBalance" class="after-balance"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('buyModal')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 6px;">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+          Bekor qilish
+        </button>
+        <button class="btn btn-primary" id="confirmBuyBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 6px;">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          Sotib olish
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../js/auth.js"></script>
+  <script src="../../js/main.js"></script>
+  <script>
+    let currentUser, selectedItem, allItems;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await EduCoin.init();
+      currentUser = EduCoin.requireAuth(['student', 'teacher']);
+      if (!currentUser) return;
+      document.getElementById('sidebar-container').innerHTML = buildSidebar(currentUser.role, currentUser);
+      const coinDisplay = document.getElementById('topCoinDisplay');
+      if (coinDisplay) {
+        const coinSpan = coinDisplay.querySelector('span');
+        if (coinSpan) coinSpan.textContent = currentUser.coins.toLocaleString();
+      }
+      allItems = EduCoin.getActiveShopItems();
+      renderShop(allItems);
+    });
+
+    function filterShop(q) {
+      const filtered = allItems.filter(i => i.name.toLowerCase().includes(q.toLowerCase()) || i.description.toLowerCase().includes(q.toLowerCase()));
+      renderShop(filtered);
+    }
+
+    function renderShop(items) {
+      const el = document.getElementById('shopGrid');
+      if (!items.length) {
+        el.innerHTML = '<div class="empty-state"><div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></div><p>Mahsulotlar topilmadi</p></div>';
+        return;
+      }
+      el.innerHTML = items.map(item => {
+        const canAfford = (currentUser.coins || 0) >= item.price;
+        return `<div class="shop-card">
+          <span class="shop-item-icon">${item.image}</span>
+          <div class="shop-item-name">${item.name}</div>
+          <div class="shop-item-desc">${item.description}</div>
+          <div class="shop-item-price">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M9.5 9.5c.5-1 2-1.5 3.5-.5s1.5 2.5.5 3.5-2.5 1-3.5.5"></path>
+              <path d="M12 8v8"></path>
+            </svg>
+            ${item.price.toLocaleString()}
+          </div>
+          <div class="shop-item-stock">Qoldi: ${item.stock} ta</div>
+          <button class="btn btn-info btn-sm btn-full" onclick="window.open('../products/index.html?id=${item.id}', '_blank')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 6px;">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            Ko'rish
+          </button>
+          <button class="btn ${canAfford ? 'btn-primary' : 'btn-secondary'} btn-sm btn-full" onclick="openBuy('${item.id}')" ${!canAfford ? 'disabled' : ''}>
+            ${canAfford ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 6px;"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg> Sotib olish' : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 6px;"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> Yetarli coin yo\'q'}
+          </button>
+        </div>`;
+      }).join('');
+    }
+
+    function openBuy(itemId) {
+      const freshUser = EduCoin.getUserById(currentUser.id);
+      currentUser = freshUser;
+      selectedItem = EduCoin.getActiveShopItems().find(i => i.id === itemId);
+      if (!selectedItem) return;
+      document.getElementById('buyItemIcon').textContent = selectedItem.image;
+      document.getElementById('buyItemName').textContent = selectedItem.name;
+      document.getElementById('buyItemDesc').textContent = selectedItem.description;
+      document.getElementById('buyItemPrice').innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;"><circle cx="12" cy="12" r="10"></circle><path d="M9.5 9.5c.5-1 2-1.5 3.5-.5s1.5 2.5.5 3.5-2.5 1-3.5.5"></path><path d="M12 8v8"></path></svg> ${selectedItem.price.toLocaleString()}`;
+      document.getElementById('buyUserBalance').innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;"><circle cx="12" cy="12" r="10"></circle><path d="M9.5 9.5c.5-1 2-1.5 3.5-.5s1.5 2.5.5 3.5-2.5 1-3.5.5"></path><path d="M12 8v8"></path></svg> ${(currentUser.coins||0).toLocaleString()}`;
+      const after = (currentUser.coins||0) - selectedItem.price;
+      document.getElementById('buyAfterBalance').innerHTML = after >= 0
+        ? `Xariddan keyin: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 2px;"><circle cx="12" cy="12" r="10"></circle><path d="M9.5 9.5c.5-1 2-1.5 3.5-.5s1.5 2.5.5 3.5-2.5 1-3.5.5"></path><path d="M12 8v8"></path></svg> ${after.toLocaleString()}`
+        : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> Balansingiz yetarli emas';
+      document.getElementById('confirmBuyBtn').disabled = after < 0;
+      openModal('buyModal');
+    }
+
+    document.getElementById('confirmBuyBtn').addEventListener('click', () => {
+      if (!selectedItem) return;
+      const result = EduCoin.purchaseItem(currentUser.id, selectedItem.id);
+      if (result.success) {
+        closeModal('buyModal');
+        currentUser = EduCoin.getUserById(currentUser.id);
+        const coinDisplay = document.getElementById('topCoinDisplay');
+        if (coinDisplay) {
+          const coinSpan = coinDisplay.querySelector('span');
+          if (coinSpan) coinSpan.textContent = currentUser.coins.toLocaleString();
+        }
+        allItems = EduCoin.getActiveShopItems();
+        renderShop(allItems);
+        showToast(`${selectedItem.name} muvaffaqiyatli sotib olindi!`, 'success');
+      } else {
+        showToast(result.msg, 'error');
+      }
+    });
+  </script>
+</body>
+</html>

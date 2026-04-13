@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="EduCoin — ta'lim mukofot tizimi">
+  <meta name="theme-color" content="#050A05">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <title>EduCoin — Coin qo'shish</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/dashboard.css">
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+    <div class="main-content">
+      <header class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+          <div class="topbar-title">➕ Coin qo'shish</div>
+        </div>
+        <div class="topbar-right"><div class="coin-display" id="topCoinDisplay">🪙 0</div></div>
+      </header>
+      <div class="page-content">
+        <div class="page-header"><div><h1>➕ EduCoin qo'shish</h1><p>Foydalanuvchilarga coin bering</p></div></div>
+        <div class="grid grid-2">
+          <div class="card">
+            <h3 style="margin-bottom:20px">Coin berish formasi</h3>
+            <div id="formAlert"></div>
+            <div class="form-group">
+              <label class="form-label">Rol bo'yicha filter</label>
+              <select class="form-control" id="roleFilter" onchange="filterUsers()">
+                <option value="">Barchasi</option>
+                <option value="student">O'quvchilar</option>
+                <option value="teacher">O'qituvchilar</option>
+                <option value="manager">Menejerlar</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Foydalanuvchi tanlang</label>
+              <select class="form-control" id="targetUser"><option value="">— Tanlang —</option></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Coin miqdori</label>
+              <input type="number" class="form-control" id="coinAmount" placeholder="Masalan: 100" min="1">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Sabab / Izoh</label>
+              <textarea class="form-control" id="coinReason" placeholder="Coin berilish sababi..."></textarea>
+            </div>
+            <button class="btn btn-primary btn-full btn-lg" onclick="addCoin()">🪙 Coin qo'shish</button>
+          </div>
+
+          <div class="card">
+            <h3 style="margin-bottom:16px">📋 So'nggi coinlar</h3>
+            <div id="recentAwards"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="../../js/auth.js"></script>
+  <script src="../../js/main.js"></script>
+  <script>
+    let currentUser, allUsers = [];
+    document.addEventListener('DOMContentLoaded', async () => {
+      await EduCoin.init();
+      currentUser = EduCoin.requireAuth(['manager','director','admin']);
+      if (!currentUser) return;
+      document.getElementById('sidebar-container').innerHTML = buildSidebar(currentUser.role, currentUser);
+      document.getElementById('topCoinDisplay').textContent = `🪙 ${(currentUser.coins||0).toLocaleString()}`;
+      allUsers = EduCoin.getUsers().filter(u=>u.id!==currentUser.id&&u.active);
+      fillSelect(allUsers);
+      renderRecent();
+    });
+
+    function fillSelect(users) {
+      const sel = document.getElementById('targetUser');
+      sel.innerHTML = '<option value="">— Tanlang —</option>';
+      const roleLabel = {student:"O'quvchi",teacher:"O'qituvchi",manager:"Menejer",director:"Direktor"};
+      users.forEach(u => {
+        const o = document.createElement('option');
+        o.value = u.id;
+        o.textContent = `${u.name} (${roleLabel[u.role]||u.role}) — 🪙 ${(u.coins||0).toLocaleString()}`;
+        sel.appendChild(o);
+      });
+    }
+
+    function filterUsers() {
+      const role = document.getElementById('roleFilter').value;
+      fillSelect(role ? allUsers.filter(u=>u.role===role) : allUsers);
+    }
+
+    function addCoin() {
+      const toId = document.getElementById('targetUser').value;
+      const amount = parseInt(document.getElementById('coinAmount').value);
+      const reason = document.getElementById('coinReason').value || 'Menejer tomonidan';
+      const el = document.getElementById('formAlert');
+      if (!toId) { el.innerHTML='<div class="alert alert-danger">Foydalanuvchi tanlang!</div>'; return; }
+      if (!amount||amount<1) { el.innerHTML='<div class="alert alert-danger">Miqdor kiriting!</div>'; return; }
+      const result = EduCoin.awardCoins(currentUser.id, toId, amount, reason);
+      if (result.success) {
+        el.innerHTML='<div class="alert alert-success">✅ Coin muvaffaqiyatli qo\'shildi!</div>';
+        document.getElementById('coinAmount').value='';
+        document.getElementById('coinReason').value='';
+        allUsers = EduCoin.getUsers().filter(u=>u.id!==currentUser.id&&u.active);
+        filterUsers();
+        renderRecent();
+        showToast('Coin muvaffaqiyatli berildi!','success');
+        setTimeout(()=>el.innerHTML='',4000);
+      } else {
+        el.innerHTML=`<div class="alert alert-danger">${result.msg}</div>`;
+      }
+    }
+
+    function renderRecent() {
+      const awards = EduCoin.getTransactions().filter(t=>t.type==='award').slice(-8).reverse();
+      const el = document.getElementById('recentAwards');
+      el.innerHTML = awards.length ? awards.map(t=>{
+        const from = EduCoin.getUserById(t.fromId);
+        const to = EduCoin.getUserById(t.toId);
+        return `<div class="txn-item">
+          <div class="txn-icon" style="background:rgba(67,233,123,0.1)">🎁</div>
+          <div class="txn-info"><div class="txn-title">${t.reason||'Mukofot'}</div>
+          <div class="txn-sub">${from?from.name:'?'} → ${to?to.name:'?'}</div></div>
+          <div><div class="txn-amount positive">+${t.amount} 🪙</div>
+          <div class="txn-date">${EduCoin.formatDate(t.createdAt)}</div></div>
+        </div>`;
+      }).join('') : '<div class="empty-state"><div class="icon">📭</div><p>Hali coin berilmagan</p></div>';
+    }
+  </script>
+</body>
+</html>

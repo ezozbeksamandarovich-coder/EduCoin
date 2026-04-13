@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="EduCoin — ta'lim mukofot tizimi">
+  <meta name="theme-color" content="#050A05">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <title>EduCoin — EduCoinlar</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/dashboard.css">
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+    <div class="main-content">
+      <header class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+          <div class="topbar-title">🪙 EduCoinlar</div>
+        </div>
+        <div class="topbar-right"><div class="coin-display" id="topCoinDisplay">🪙 0</div></div>
+      </header>
+      <div class="page-content">
+        <div id="balanceHero" class="balance-hero">
+          <div class="label">UMUMIY BALANS</div>
+          <div class="amount" id="balanceAmount">0</div>
+          <div class="sub">EduCoin</div>
+        </div>
+        <div class="grid grid-3" style="margin-bottom:24px">
+          <div class="stat-card"><div class="stat-icon" style="background:rgba(67,233,123,0.15)">📥</div><div class="stat-info"><div class="label">Jami olindi</div><div class="value" id="totalReceived">0</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:rgba(255,107,107,0.15)">📤</div><div class="stat-info"><div class="label">Jami sarflandi</div><div class="value" id="totalSpent">0</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:rgba(0,255,136,0.15)">🔄</div><div class="stat-info"><div class="label">Tranzaksiyalar</div><div class="value" id="totalTxns">0</div></div></div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:16px">Tranzaksiya tarixi</h3>
+          <div id="txnList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="../../js/auth.js"></script>
+  <script src="../../js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      await EduCoin.init();
+      const user = EduCoin.requireAuth(['teacher','manager','director']);
+      if (!user) return;
+      document.getElementById('sidebar-container').innerHTML = buildSidebar(user.role, user);
+      document.getElementById('topCoinDisplay').textContent = `🪙 ${(user.coins||0).toLocaleString()}`;
+      document.getElementById('balanceAmount').textContent = (user.coins||0).toLocaleString();
+      const txns = EduCoin.getUserTransactions(user.id).reverse();
+      document.getElementById('totalTxns').textContent = txns.length;
+      document.getElementById('totalReceived').textContent = txns.filter(t=>t.toId===user.id&&t.amount>0).reduce((s,t)=>s+t.amount,0).toLocaleString();
+      document.getElementById('totalSpent').textContent = Math.abs(txns.filter(t=>t.fromId===user.id&&t.amount<0).reduce((s,t)=>s+t.amount,0)).toLocaleString();
+      const icons = {award:'🎁',transfer:'💸',purchase:'🛒'};
+      document.getElementById('txnList').innerHTML = txns.length ? txns.map(t => {
+        const isPos = t.toId===user.id&&t.type!=='purchase';
+        const other = EduCoin.getUserById(t.toId===user.id?t.fromId:t.toId);
+        return `<div class="txn-item">
+          <div class="txn-icon" style="background:${isPos?'rgba(67,233,123,0.1)':'rgba(255,107,107,0.1)'}">${icons[t.type]||'💱'}</div>
+          <div class="txn-info"><div class="txn-title">${t.reason||EduCoin.txnTypeLabel(t.type)}</div><div class="txn-sub">${other?other.name:'Tizim'}</div></div>
+          <div><div class="txn-amount ${isPos?'positive':'negative'}">${isPos?'+':''}${t.amount} 🪙</div><div class="txn-date">${EduCoin.formatDate(t.createdAt)}</div></div>
+        </div>`;
+      }).join('') : '<div class="empty-state"><div class="icon">📭</div><p>Tranzaksiyalar yo\'q</p></div>';
+    });
+  </script>
+</body>
+</html>

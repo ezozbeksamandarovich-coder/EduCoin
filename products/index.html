@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="EduCoin — ta'lim mukofot tizimi">
+  <meta name="theme-color" content="#050A05">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <title>EduCoin - Mahsulotlar</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="blur-on">
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+    <div class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button type="button" class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')" aria-label="Menyu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <div>
+            <div class="topbar-title">Mahsulotlar</div>
+            <div style="font-size:12px;color:var(--text3);">Do'kon katalogi</div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="coin-display" id="topCoinDisplay">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M9.5 9.5c.5-1 2-1.5 3.5-.5s1.5 2.5.5 3.5-2.5 1-3.5.5"></path>
+              <path d="M12 8v8"></path>
+            </svg>
+            <span>0 coin</span>
+          </div>
+        </div>
+      </header>
+      <div class="page-content">
+        <div class="page-header">
+          <div>
+            <h1>Mahsulotlar</h1>
+            <p>Barcha mahsulotlar ro'yxati</p>
+          </div>
+          <button class="btn btn-primary" onclick="window.location.href='../index.html'">
+            <i class="fas fa-arrow-left"></i>
+            Orqaga
+          </button>
+        </div>
+
+        <div class="search-filter-row">
+          <div class="search-bar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="searchInput" placeholder="Mahsulot qidirish..." oninput="filterProducts()" autocomplete="off">
+          </div>
+          <select class="form-control role-filter" id="categoryFilter" onchange="filterProducts()">
+            <option value="">Barcha kategoriyalar</option>
+            <option value="Akademik">Akademik</option>
+            <option value="Ta'lim">Ta'lim</option>
+            <option value="Buyum">Buyum</option>
+            <option value="Ko'ngilochar">Ko'ngilochar</option>
+            <option value="Boshqa">Boshqa</option>
+          </select>
+        </div>
+
+        <div class="shop-grid" id="productsGrid">
+          <div class="spinner"></div>
+        </div>
+
+        <!-- Product Detail Section (Hidden by default) -->
+        <div id="productDetailSection" class="product-detail-section" style="display: none;">
+          <div class="detail-header">
+            <button class="btn btn-secondary" onclick="backToProducts()">
+              <i class="fas fa-arrow-left"></i> Orqaga
+            </button>
+            <h2 id="detailProductName">Mahsulot nomi</h2>
+          </div>
+          
+          <div class="product-detail-container">
+            <div class="product-image-section">
+              <div id="detailProductImage"></div>
+            </div>
+            
+            <div class="product-info-section">
+              <div class="product-header">
+                <h2 id="detailTitle">Mahsulot nomi</h2>
+                <div class="product-badges">
+                  <span id="detailCategory" class="badge badge-info">Kategoriya</span>
+                  <span id="detailStatus" class="badge badge-success">Faol</span>
+                </div>
+              </div>
+              
+              <p id="detailDescription" class="product-description">Tavsif</p>
+              
+              <div class="product-meta">
+                <div class="meta-item">
+                  <span class="meta-label">Narx:</span>
+                  <span id="detailPrice" class="meta-value price">0 coin</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Qoldiq:</span>
+                  <span id="detailStock" class="meta-value">0 ta</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Holat:</span>
+                  <span id="detailActive" class="meta-value">Faol</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Yaratuvchi:</span>
+                  <span id="detailCreator" class="meta-value">-</span>
+                </div>
+              </div>
+
+              <div id="adminActions" class="admin-actions" style="display: none;">
+                <h3>Administration</h3>
+                <div class="action-buttons">
+                  <button class="btn btn-warning" id="toggleStatusBtn" onclick="toggleProductStatus()">
+                    <i class="fas fa-power-off"></i> Holatni o'zgartirish
+                  </button>
+                  <button class="btn btn-danger" onclick="deleteCurrentProduct()">
+                    <i class="fas fa-trash"></i> Mahsulotni o'chirish
+                  </button>
+                </div>
+              </div>
+
+              <div class="user-balance">
+                <span class="balance-label">Sizning balansingiz:</span>
+                <span class="balance-amount" id="userBalance">0 coin</span>
+              </div>
+
+              <div class="purchase-actions">
+                <button type="button" class="btn btn-primary btn-lg" id="buyBtnInline" onclick="buyCurrentProduct()">
+                  <i class="fas fa-shopping-cart"></i> Sotib olish
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Detail Modal (For non-manager roles) -->
+  <div class="modal-overlay" id="productModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <div class="modal-title">Mahsulot tafsilotlari</div>
+        <button class="modal-close" onclick="closeModal('productModal')">×</button>
+      </div>
+      <div class="modal-body">
+        <div id="productDetail"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('productModal')">Yopish</button>
+        <button type="button" class="btn btn-primary" id="buyBtnModal">Sotib olish</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    let currentUser, allProducts;
+
+    function setTopCoinDisplay(amount) {
+      const el = document.getElementById('topCoinDisplay');
+      const span = el && el.querySelector('span');
+      const text = EduCoin.formatCoins(amount);
+      if (span) span.textContent = text;
+      else if (el) el.textContent = text;
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await EduCoin.init();
+      currentUser = EduCoin.getCurrentUser();
+      if (!currentUser) {
+        window.location.href = '../index.html';
+        return;
+      }
+      
+      document.getElementById('sidebar-container').innerHTML = buildSidebar(currentUser.role, currentUser);
+      setTopCoinDisplay(currentUser.coins || 0);
+      
+      loadProducts();
+    });
+
+    function loadProducts() {
+      allProducts = EduCoin.getShopItems();
+      renderProducts(allProducts);
+      
+      // Check if there's a product ID in URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const productId = urlParams.get('id');
+      
+      if (productId) {
+        // Find and show the specific product
+        const product = allProducts.find(p => p.id === productId);
+        if (product) {
+          setTimeout(() => {
+            showProductDetail(productId);
+          }, 500);
+        }
+      }
+    }
+
+    function filterProducts() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const category = document.getElementById('categoryFilter').value;
+      
+      let filtered = allProducts;
+      
+      if (query) {
+        filtered = filtered.filter(p => 
+          p.name.toLowerCase().includes(query) || 
+          p.description.toLowerCase().includes(query)
+        );
+      }
+      
+      if (category) {
+        filtered = filtered.filter(p => p.category === category);
+      }
+      
+      renderProducts(filtered);
+    }
+
+    function renderProducts(products) {
+      const container = document.getElementById('productsGrid');
+      
+      if (!products.length) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            </div>
+            <h3>Mahsulotlar topilmadi</h3>
+            <p>Qidirish shartlarini o'zgartiring</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = products.map(product => {
+        const canAfford = (currentUser.coins || 0) >= product.price;
+        const productImage = product.image && product.image.startsWith('data:') 
+          ? `<img src="${product.image}" alt="${product.name}">`
+          : `<span>${product.image || '📦'}</span>`;
+        
+        return `
+          <div class="shop-card">
+            <div class="shop-item-icon">
+              ${productImage}
+            </div>
+            <div class="shop-item-name">${product.name}</div>
+            <div class="shop-item-desc">${product.description || 'Tavsif mavjud emas'}</div>
+            <div class="shop-item-price">${EduCoin.formatCoins(product.price)}</div>
+            <div class="shop-item-stock">Qoldi: ${product.stock} ta</div>
+            <div class="shop-item-category">
+              <span class="badge badge-info">${product.category || 'Boshqa'}</span>
+            </div>
+            <button type="button" class="btn btn-info btn-sm btn-full" onclick="showProductDetail('${product.id}')">
+              <i class="fas fa-eye"></i> Ko'rish
+            </button>
+            <button type="button" class="btn ${canAfford ? 'btn-primary' : 'btn-secondary'} btn-sm btn-full" 
+                    onclick="buyProduct('${product.id}')" ${!canAfford ? 'disabled' : ''}>
+              ${canAfford ? 'Sotib olish' : 'Yetarli coin yo\'q'}
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function showProductDetail(productId) {
+      const product = allProducts.find(p => p.id === productId);
+      if (!product) return;
+
+      const isManager = ['admin', 'manager', 'director'].includes(currentUser.role);
+      
+      if (isManager) {
+        // Show inline detail for managers
+        showInlineProductDetail(product);
+      } else {
+        // Show modal for regular users
+        showModalProductDetail(product);
+      }
+    }
+
+    function showInlineProductDetail(product) {
+      // Hide products grid, show detail section
+      document.getElementById('productsGrid').style.display = 'none';
+      document.getElementById('productDetailSection').style.display = 'block';
+
+      // Update detail information
+      document.getElementById('detailProductName').textContent = product.name;
+      document.getElementById('detailTitle').textContent = product.name;
+      document.getElementById('detailDescription').textContent = product.description || 'Tavsif mavjud emas';
+      document.getElementById('detailPrice').textContent = EduCoin.formatCoins(product.price);
+      document.getElementById('detailStock').textContent = `${product.stock} ta`;
+      document.getElementById('detailCategory').textContent = product.category || 'Boshqa';
+      
+      // Update status badge
+      const statusBadge = document.getElementById('detailStatus');
+      statusBadge.textContent = product.active ? 'Faol' : 'Nofaol';
+      statusBadge.className = `badge ${product.active ? 'badge-success' : 'badge-danger'}`;
+      
+      document.getElementById('detailActive').textContent = product.active ? 'Faol' : 'Nofaol';
+
+      // Show product image
+      const imageContainer = document.getElementById('detailProductImage');
+      if (product.image && product.image.startsWith('data:')) {
+        imageContainer.innerHTML = `<img src="${product.image}" alt="${product.name}" style="width: 100%; max-width: 400px; border-radius: 12px;">`;
+      } else {
+        imageContainer.innerHTML = `<div style="font-size: 150px; text-align: center;">${product.image || '📦'}</div>`;
+      }
+
+      // Show creator info if available
+      const creator = EduCoin.getUserById(product.createdBy);
+      document.getElementById('detailCreator').textContent = creator ? creator.name : 'Noma\'lum';
+
+      // Show admin actions for managers
+      const isAdmin = ['admin', 'manager', 'director'].includes(currentUser.role);
+      document.getElementById('adminActions').style.display = isAdmin ? 'block' : 'none';
+
+      // Update user balance
+      document.getElementById('userBalance').textContent = EduCoin.formatCoins(currentUser.coins || 0);
+
+      // Update buy button
+      const buyBtn = document.getElementById('buyBtnInline');
+      const canAfford = (currentUser.coins || 0) >= product.price;
+      
+      buyBtn.disabled = !canAfford || !product.active;
+      if (!canAfford) {
+        buyBtn.innerHTML = 'Yetarli coin yo\'q';
+      } else if (!product.active) {
+        buyBtn.innerHTML = 'Mahsulot nofaol';
+      } else {
+        buyBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Sotib olish';
+      }
+
+      // Store current product ID for actions
+      window.currentProductId = product.id;
+    }
+
+    function showModalProductDetail(product) {
+      // Original modal logic for non-managers
+      const canAfford = (currentUser.coins || 0) >= product.price;
+      const productImage = product.image && product.image.startsWith('data:') 
+        ? `<img src="${product.image}" alt="${product.name}" style="width: 100%; max-width: 300px; border-radius: 8px;">`
+        : `<div style="font-size: 120px; text-align: center;">${product.image || '📦'}</div>`;
+
+      document.getElementById('productDetail').innerHTML = `
+        <div class="product-detail">
+          <div class="product-image-section">
+            ${productImage}
+          </div>
+          <div class="product-info-section">
+            <h2>${product.name}</h2>
+            <p class="product-description">${product.description || 'Tavsif mavjud emas'}</p>
+            
+            <div class="product-meta">
+              <div class="meta-item">
+                <span class="meta-label">Narx:</span>
+                <span class="meta-value price">${EduCoin.formatCoins(product.price)}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Qoldiq:</span>
+                <span class="meta-value">${product.stock} ta</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Kategoriya:</span>
+                <span class="meta-value">${product.category || 'Boshqa'}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Holat:</span>
+                <span class="meta-value">
+                  <span class="badge ${product.active ? 'badge-success' : 'badge-danger'}">
+                    ${product.active ? 'Faol' : 'Nofaol'}
+                  </span>
+                </span>
+              </div>
+            </div>
+
+            ${!canAfford ? `
+              <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                Sizda bu mahsulotni sotib olish uchun yetarli coin yo'q. 
+                Kerakli miqdor: ${EduCoin.formatCoins(product.price - currentUser.coins)}
+              </div>
+            ` : ''}
+
+            <div class="user-balance">
+              <span class="balance-label">Sizning balansingiz:</span>
+              <span class="balance-amount">${EduCoin.formatCoins(currentUser.coins || 0)}</span>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const buyBtn = document.getElementById('buyBtnModal');
+      buyBtn.disabled = !canAfford || !product.active;
+      if (!canAfford) {
+        buyBtn.textContent = 'Yetarli coin yo\'q';
+      } else if (!product.active) {
+        buyBtn.textContent = 'Mahsulot nofaol';
+      } else {
+        buyBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Sotib olish';
+      }
+      
+      if (canAfford && product.active) {
+        buyBtn.onclick = () => buyProduct(product.id);
+      }
+
+      openModal('productModal');
+    }
+
+    function backToProducts() {
+      document.getElementById('productsGrid').style.display = 'grid';
+      document.getElementById('productDetailSection').style.display = 'none';
+      window.currentProductId = null;
+    }
+
+    function toggleProductStatus() {
+      if (!window.currentProductId) return;
+      
+      const items = EduCoin.getShopItems();
+      const idx = items.findIndex(i => i.id === window.currentProductId);
+      if (idx !== -1) {
+        items[idx].active = !items[idx].active;
+        EduCoin.setData('shop', items);
+        
+        // Refresh the detail view
+        const product = items[idx];
+        showInlineProductDetail(product);
+        
+        showToast(`Mahsulot holati ${product.active ? 'faol' : 'nofaol'} ga o'zgartirildi!`, 'success');
+      }
+    }
+
+    function deleteCurrentProduct() {
+      if (!window.currentProductId) return;
+      
+      if (!confirm('Mahsulotni o\'chirishni hohlaysizmi? Bu amal orqaga qaytarib bo\'lmaydi!')) return;
+      
+      const items = EduCoin.getShopItems();
+      const filtered = items.filter(i => i.id !== window.currentProductId);
+      EduCoin.setData('shop', filtered);
+      
+      showToast('Mahsulot butunlay o\'chirildi!', 'success');
+      backToProducts();
+      loadProducts();
+    }
+
+    function buyCurrentProduct() {
+      if (window.currentProductId) {
+        buyProduct(window.currentProductId);
+      }
+    }
+
+    function buyProduct(productId) {
+      const product = allProducts.find(p => p.id === productId);
+      if (!product || !currentUser) return;
+
+      if (currentUser.coins < product.price) {
+        showToast('Yetarli coin yo\'q!', 'error');
+        return;
+      }
+
+      if (product.stock <= 0) {
+        showToast('Mahsulot qoldiqa qolmagan!', 'error');
+        return;
+      }
+
+      // Create purchase
+      const purchase = {
+        id: 'purchase_' + Date.now(),
+        userId: currentUser.id,
+        productId: productId,
+        productName: product.name,
+        price: product.price,
+        quantity: 1,
+        purchaseDate: new Date().toISOString(),
+        status: 'completed'
+      };
+
+      // Update user coins
+      EduCoin.updateUser(currentUser.id, { 
+        coins: currentUser.coins - product.price 
+      });
+
+      // Update product stock
+      EduCoin.updateShopItem(productId, { 
+        stock: product.stock - 1 
+      });
+
+      // Save purchase
+      const purchases = EduCoin.getData('purchases') || [];
+      purchases.push(purchase);
+      EduCoin.setData('purchases', purchases);
+
+      // Update current user data
+      currentUser.coins -= product.price;
+      setTopCoinDisplay(currentUser.coins);
+
+      closeModal('productModal');
+      showToast('Mahsulot muvaffaqiyatli sotib olindi!', 'success');
+      
+      // Reload products
+      loadProducts();
+    }
+
+    function openModal(modalId) {
+      document.getElementById(modalId).style.display = 'flex';
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).style.display = 'none';
+    }
+
+    function showToast(message, type = 'info') {
+      // Simple toast implementation
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.textContent = message;
+      toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 500;
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+      `;
+      
+      switch(type) {
+        case 'success':
+          toast.style.background = 'linear-gradient(135deg, #00CC66, #00FF88)';
+          toast.style.color = '#050A05';
+          break;
+        case 'error':
+          toast.style.background = '#EF4444';
+          break;
+        default:
+          toast.style.background = '#3B82F6';
+      }
+      
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+          document.body.removeChild(toast);
+        }, 300);
+      }, 3000);
+    }
+  </script>
+
+  <style>
+    .product-detail-section {
+      animation: slideIn 0.3s ease;
+    }
+
+    .detail-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .detail-header h2 {
+      margin: 0;
+      color: var(--text-primary);
+    }
+
+    .product-detail-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: start;
+    }
+
+    .product-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 20px;
+    }
+
+    .product-badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .admin-actions {
+      background: var(--bg-tertiary);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin: 20px 0;
+    }
+
+    .admin-actions h3 {
+      margin: 0 0 15px 0;
+      color: var(--text-primary);
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .purchase-actions {
+      margin-top: 30px;
+    }
+
+    .btn-lg {
+      padding: 16px 32px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .product-detail {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      align-items: start;
+    }
+
+    .product-image-section {
+      text-align: center;
+    }
+
+    .product-info-section h2 {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+
+    .product-description {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .product-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .meta-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .meta-label {
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .meta-value {
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .meta-value.price {
+      color: var(--coin);
+      font-family: 'Space Mono', monospace;
+    }
+
+    .user-balance {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius);
+      margin-top: 20px;
+    }
+
+    .balance-label {
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .balance-amount {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--coin);
+      font-family: 'Space Mono', monospace;
+    }
+
+    .shop-item-category {
+      margin-bottom: 15px;
+    }
+
+    .modal-lg {
+      max-width: 800px;
+      width: 90%;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+
+    @media (max-width: 768px) {
+      .product-detail {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+    }
+  </style>
+</body>
+</html>

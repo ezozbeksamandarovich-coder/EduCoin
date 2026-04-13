@@ -1,0 +1,10 @@
+{
+  "name": "educoinjon",
+  "version": "1.0.0",
+  "private": true,
+  "description": "EduCoin local static server",
+  "scripts": {
+    "start": "node server.js",
+    "start:simple": "node server-simple.js"
+  }
+}

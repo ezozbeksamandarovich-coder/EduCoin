@@ -1,0 +1,74 @@
+[
+  {
+    "id": "s001",
+    "name": "Sertifikat",
+    "description": "O'quv kursi tugaganligi haqida rasmiy sertifikat",
+    "price": 500,
+    "image": "🏆",
+    "category": "Akademik",
+    "stock": 100,
+    "active": true,
+    "createdBy": "u003",
+    "createdAt": "2024-01-15T00:00:00Z"
+  },
+  {
+    "id": "s002",
+    "name": "Bonus Dars",
+    "description": "1 soatlik qo'shimcha individual dars",
+    "price": 200,
+    "image": "📚",
+    "category": "Ta'lim",
+    "stock": 50,
+    "active": true,
+    "createdBy": "u003",
+    "createdAt": "2024-01-15T00:00:00Z"
+  },
+  {
+    "id": "s003",
+    "name": "Premium Daftar",
+    "description": "EduCoin logoli premium yozuv daftari",
+    "price": 150,
+    "image": "📓",
+    "category": "Buyum",
+    "stock": 30,
+    "active": true,
+    "createdBy": "u002",
+    "createdAt": "2024-01-16T00:00:00Z"
+  },
+  {
+    "id": "s004",
+    "name": "Kitob Sovg'a",
+    "description": "Dasturlash bo'yicha elektron kitob",
+    "price": 300,
+    "image": "📖",
+    "category": "Ta'lim",
+    "stock": 20,
+    "active": true,
+    "createdBy": "u002",
+    "createdAt": "2024-01-17T00:00:00Z"
+  },
+  {
+    "id": "s005",
+    "name": "Kino Chiptasi",
+    "description": "Yaqin kino markaziga 1 ta chipta",
+    "price": 400,
+    "image": "🎬",
+    "category": "Ko'ngilochar",
+    "stock": 10,
+    "active": true,
+    "createdBy": "u003",
+    "createdAt": "2024-01-18T00:00:00Z"
+  },
+  {
+    "id": "s006",
+    "name": "Loyiha Ko'rsatish",
+    "description": "O'z loyihangizni mentorga ko'rsatish imkoniyati",
+    "price": 250,
+    "image": "💻",
+    "category": "Akademik",
+    "stock": 15,
+    "active": true,
+    "createdBy": "u003",
+    "createdAt": "2024-01-19T00:00:00Z"
+  }
+]

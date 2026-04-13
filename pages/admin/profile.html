@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="EduCoin — ta'lim mukofot tizimi">
+  <meta name="theme-color" content="#050A05">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <title>EduCoin — Profil</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/dashboard.css">
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+    <div class="main-content">
+      <header class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+          <div class="topbar-title">👤 Profil</div>
+        </div>
+        <div class="topbar-right">
+          <div class="coin-display" id="topCoinDisplay">🪙 0</div>
+        </div>
+      </header>
+      <div class="page-content">
+        <div class="profile-header" id="profileHeader"></div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <h3 style="margin-bottom:16px">📋 Ma'lumotlar</h3>
+            <div id="profileInfo"></div>
+          </div>
+          <div class="card">
+            <h3 style="margin-bottom:16px">�️ Profil rasmi</h3>
+            <div id="avatarAlert"></div>
+            <div class="form-group">
+              <label class="form-label">Joriy rasm</label>
+              <div style="display:flex;align-items:center;gap:15px;margin-bottom:10px">
+                <img id="currentAvatar" src="" alt="Avatar" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid var(--border);">
+                <button class="btn btn-sm btn-danger" onclick="removeAvatar()">🗑️ O'chirish</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Yangi rasm yuklash</label>
+              <input type="file" id="avatarInput" accept="image/*" class="form-control" onchange="uploadAvatar(event)">
+              <small style="color:var(--text3);display:block;margin-top:5px;">
+                📸 Rasm formatlari: JPG, PNG, GIF (maks: 5MB)
+              </small>
+            </div>
+          </div>
+          <div class="card">
+            <h3 style="margin-bottom:16px">� Parolni o'zgartirish</h3>
+            <div id="pwdAlert"></div>
+            <div class="form-group">
+              <label class="form-label">Eski parol</label>
+              <input type="password" class="form-control" id="oldPwd" placeholder="Eski parolingiz">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Yangi parol</label>
+              <input type="password" class="form-control" id="newPwd" placeholder="Yangi parol">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Yangi parolni tasdiqlang</label>
+              <input type="password" class="form-control" id="confirmPwd" placeholder="Tasdiqlang">
+            </div>
+            <button class="btn btn-primary btn-full" onclick="changePassword()">💾 Saqlash</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="../../js/auth.js"></script>
+  <script src="../../js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      await EduCoin.init();
+      const user = EduCoin.requireAuth();
+      if (!user) return;
+      document.getElementById('sidebar-container').innerHTML = buildSidebar(user.role, user);
+      document.getElementById('topCoinDisplay').textContent = `🪙 ${(user.coins||0).toLocaleString()}`;
+
+      const roleLabels = { student:"O'quvchi", teacher:"O'qituvchi", manager:"Menejer", director:"Direktor", admin:"Admin" };
+      document.getElementById('profileHeader').innerHTML = `
+        <div class="profile-avatar">${getInitials(user.name)}</div>
+        <div class="profile-info">
+          <h2>${user.name}</h2>
+          <p>${roleLabels[user.role]} • ${user.email || 'Email yo\'q'}</p>
+          <div style="margin-top:8px"><span class="badge badge-success">✅ Faol</span></div>
+        </div>
+        <div style="margin-left:auto;text-align:right">
+          <div style="font-size:11px;color:var(--text3)">BALANS</div>
+          <div style="font-size:28px;font-weight:800;color:var(--coin);font-family:'Space Mono',monospace">${(user.coins||0).toLocaleString()} 🪙</div>
+        </div>
+      `;
+
+      const group = user.role === 'student' ? EduCoin.getStudentGroup(user.id) : null;
+      document.getElementById('profileInfo').innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:14px">
+          ${row('👤', 'Ism', user.name)}
+          ${row('🔐', 'Username', user.username)}
+          ${row('📧', 'Email', user.email || '—')}
+          ${row('🎭', 'Rol', roleLabels[user.role])}
+          ${group ? row('👥', 'Guruh', group.name) : ''}
+          ${row('📅', 'Ro\'yxatdan o\'tgan', EduCoin.formatDate(user.createdAt))}
+        </div>
+      `;
+    });
+
+    function row(icon, label, value) {
+      return `<div style="display:flex;gap:12px;align-items:center">
+        <div style="font-size:18px;width:24px">${icon}</div>
+        <div>
+          <div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase">${label}</div>
+          <div style="font-size:15px;font-weight:600;margin-top:2px">${value}</div>
+        </div>
+      </div>`;
+    }
+
+    function changePassword() {
+      const user = EduCoin.getCurrentUser();
+      const old = document.getElementById('oldPwd').value;
+      const newPwd = document.getElementById('newPwd').value;
+      const confirm = document.getElementById('confirmPwd').value;
+      
+      if (!old || !newPwd || !confirm) {
+        document.getElementById('pwdAlert').innerHTML = '<div class="alert alert-danger">⚠️ Barcha maydonlar to\'ldirilishi kerak!</div>';
+        return;
+      }
+      
+      if (newPwd !== confirm) {
+        document.getElementById('pwdAlert').innerHTML = '<div class="alert alert-danger">⚠️ Yangi parollar bir-biriga mos kelmadi!</div>';
+        return;
+      }
+      
+      if (newPwd.length < 6) {
+        document.getElementById('pwdAlert').innerHTML = '<div class="alert alert-danger">⚠️ Parol kamida 6 ta belgidan iborat bo\'lishi kerak!</div>';
+        return;
+      }
+      
+      const users = EduCoin.getUsers();
+      const userIndex = users.findIndex(u => u.id === user.id);
+      users[userIndex].password = newPwd;
+      EduCoin.setData('users', users);
+      
+      document.getElementById('pwdAlert').innerHTML = '<div class="alert alert-success">✅ Parol muvaffaqiyatli o\'zgartirildi!</div>';
+      showToast('Parol o\'zgartirildi!', 'success');
+      
+      setTimeout(() => {
+        document.getElementById('oldPwd').value = '';
+        document.getElementById('newPwd').value = '';
+        document.getElementById('confirmPwd').value = '';
+      }, 2000);
+    }
+
+    function uploadAvatar(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      // Check file size (5MB max)
+      if (file.size > 5 * 1024 * 1024) {
+        document.getElementById('avatarAlert').innerHTML = '<div class="alert alert-danger">⚠️ Rasm hajmi 5MB dan oshmasligi kerak!</div>';
+        return;
+      }
+      
+      // Check file type
+      if (!file.type.match(/^image\/(jpeg|jpg|png|gif)$/)) {
+        document.getElementById('avatarAlert').innerHTML = '<div class="alert alert-danger">⚠️ Faqat JPG, PNG yoki GIF rasm qabul qilinadi!</div>';
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target.result;
+        const user = EduCoin.getCurrentUser();
+        
+        // Update user avatar
+        const users = EduCoin.getUsers();
+        const userIndex = users.findIndex(u => u.id === user.id);
+        users[userIndex].avatar = dataUrl;
+        EduCoin.setData('users', users);
+        
+        // Update display
+        document.getElementById('currentAvatar').src = dataUrl;
+        document.getElementById('avatarAlert').innerHTML = '<div class="alert alert-success">✅ Avatar muvaffaqiyatli yangilandi!</div>';
+        showToast('Avatar yangilandi!', 'success');
+      };
+      
+      reader.onerror = () => {
+        document.getElementById('avatarAlert').innerHTML = '<div class="alert alert-danger">⚠️ Rasm yuklashda xatolik yuz berdi!</div>';
+      };
+      
+      reader.readAsDataURL(file);
+    }
+
+    function removeAvatar() {
+      if (!confirm('Avatarni o\'chirmoqchchimisiz?')) return;
+      
+      const user = EduCoin.getCurrentUser();
+      const users = EduCoin.getUsers();
+      const userIndex = users.findIndex(u => u.id === user.id);
+      users[userIndex].avatar = null;
+      EduCoin.setData('users', users);
+      
+      // Update display
+      document.getElementById('currentAvatar').src = '';
+      document.getElementById('avatarAlert').innerHTML = '<div class="alert alert-success">✅ Avatar o\'chirildi!</div>';
+      showToast('Avatar o\'chirildi!', 'success');
+    }
+  </script>
+</body>
+</html>

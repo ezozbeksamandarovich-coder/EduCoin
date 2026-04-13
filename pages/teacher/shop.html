@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="EduCoin — ta'lim mukofot tizimi">
+  <meta name="theme-color" content="#050A05">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <title>EduCoin — Do'kon</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/dashboard.css">
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+    <div class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+          <div class="topbar-title">🛍️ Do'kon</div>
+        </div>
+        <div class="topbar-right">
+          <div class="coin-display" id="topCoinDisplay">🪙 0</div>
+        </div>
+      </header>
+      <div class="page-content">
+        <div class="page-header">
+          <div><h1>🛍️ Do'kon</h1><p>EduCoinlaringizni foydali narsalarga almashtiring</p></div>
+        </div>
+
+        <div class="search-bar">
+          <span>🔍</span>
+          <input type="text" id="searchInput" placeholder="Mahsulot qidirish..." oninput="filterShop(this.value)">
+        </div>
+
+        <div class="shop-grid" id="shopGrid">
+          <div class="spinner"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Purchase Modal -->
+  <div class="modal-overlay" id="buyModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">🛒 Xarid tasdiqlash</div>
+        <button class="modal-close" onclick="closeModal('buyModal')">×</button>
+      </div>
+      <div class="modal-body">
+        <div id="buyItemInfo" class="buy-item-info">
+          <div id="buyItemIcon" class="buy-item-icon"></div>
+          <h3 id="buyItemName" class="buy-item-name"></h3>
+          <p id="buyItemDesc" class="buy-item-desc"></p>
+          <div class="buy-price-info">
+            <div style="text-align:center">
+              <div class="price-label">NARX</div>
+              <div id="buyItemPrice" class="price-value"></div>
+            </div>
+            <div style="text-align:center">
+              <div class="price-label">BALANSINGIZ</div>
+              <div id="buyUserBalance" class="price-value"></div>
+            </div>
+          </div>
+          <div id="buyAfterBalance" class="after-balance"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('buyModal')">Bekor qilish</button>
+        <button class="btn btn-primary" id="confirmBuyBtn">✅ Sotib olish</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../js/auth.js"></script>
+  <script src="../../js/main.js"></script>
+  <script>
+    let currentUser, selectedItem, allItems;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await EduCoin.init();
+      currentUser = EduCoin.requireAuth(['student', 'teacher']);
+      if (!currentUser) return;
+      document.getElementById('sidebar-container').innerHTML = buildSidebar(currentUser.role, currentUser);
+      document.getElementById('topCoinDisplay').textContent = `🪙 ${currentUser.coins.toLocaleString()}`;
+      allItems = EduCoin.getActiveShopItems();
+      renderShop(allItems);
+    });
+
+    function filterShop(q) {
+      const filtered = allItems.filter(i => i.name.toLowerCase().includes(q.toLowerCase()) || i.description.toLowerCase().includes(q.toLowerCase()));
+      renderShop(filtered);
+    }
+
+    function renderShop(items) {
+      const el = document.getElementById('shopGrid');
+      if (!items.length) {
+        el.innerHTML = '<div class="empty-state"><div class="icon">🏪</div><p>Mahsulotlar topilmadi</p></div>';
+        return;
+      }
+      el.innerHTML = items.map(item => {
+        const canAfford = (currentUser.coins || 0) >= item.price;
+        return `<div class="shop-card">
+          <span class="shop-item-icon">${item.image}</span>
+          <div class="shop-item-name">${item.name}</div>
+          <div class="shop-item-desc">${item.description}</div>
+          <div class="shop-item-price">🪙 ${item.price.toLocaleString()}</div>
+          <div class="shop-item-stock">Qoldi: ${item.stock} ta</div>
+          <button class="btn btn-info btn-sm btn-full" onclick="window.open('../products/index.html?id=${item.id}', '_blank')">
+            <i class="fas fa-eye"></i> Ko'rish
+          </button>
+          <button class="btn ${canAfford ? 'btn-primary' : 'btn-secondary'} btn-sm btn-full" onclick="openBuy('${item.id}')" ${!canAfford ? 'disabled' : ''}>
+            ${canAfford ? '🛒 Sotib olish' : '❌ Yetarli coin yo\'q'}
+          </button>
+        </div>`;
+      }).join('');
+    }
+
+    function openBuy(itemId) {
+      const freshUser = EduCoin.getUserById(currentUser.id);
+      currentUser = freshUser;
+      selectedItem = EduCoin.getActiveShopItems().find(i => i.id === itemId);
+      if (!selectedItem) return;
+      document.getElementById('buyItemIcon').textContent = selectedItem.image;
+      document.getElementById('buyItemName').textContent = selectedItem.name;
+      document.getElementById('buyItemDesc').textContent = selectedItem.description;
+      document.getElementById('buyItemPrice').textContent = `🪙 ${selectedItem.price.toLocaleString()}`;
+      document.getElementById('buyUserBalance').textContent = `🪙 ${(currentUser.coins||0).toLocaleString()}`;
+      const after = (currentUser.coins||0) - selectedItem.price;
+      document.getElementById('buyAfterBalance').textContent = after >= 0
+        ? `Xariddan keyin: 🪙 ${after.toLocaleString()}`
+        : '❌ Balansingiz yetarli emas';
+      document.getElementById('confirmBuyBtn').disabled = after < 0;
+      openModal('buyModal');
+    }
+
+    document.getElementById('confirmBuyBtn').addEventListener('click', () => {
+      if (!selectedItem) return;
+      const result = EduCoin.purchaseItem(currentUser.id, selectedItem.id);
+      if (result.success) {
+        closeModal('buyModal');
+        currentUser = EduCoin.getUserById(currentUser.id);
+        document.getElementById('topCoinDisplay').textContent = `🪙 ${currentUser.coins.toLocaleString()}`;
+        allItems = EduCoin.getActiveShopItems();
+        renderShop(allItems);
+        showToast(`✅ ${selectedItem.name} muvaffaqiyatli sotib olindi!`, 'success');
+      } else {
+        showToast('❌ ' + result.msg, 'error');
+      }
+    });
+  </script>
+</body>
+</html>

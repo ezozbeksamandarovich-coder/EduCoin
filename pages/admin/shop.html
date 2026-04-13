@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="EduCoin — ta'lim mukofot tizimi">
+  <meta name="theme-color" content="#050A05">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <title data-translate="shop.title">EduCoin — Do'kon</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/dashboard.css">
+  <style>
+    .shop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .shop-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.3s ease;
+      animation: slideIn 0.5s ease;
+    }
+    .shop-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0,255,136,0.2);
+      border-color: var(--primary);
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .shop-item-image {
+      width: 100%;
+      height: 150px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+    .shop-item-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+    .shop-item-price {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 12px;
+    }
+    .shop-item-stock {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 15px;
+    }
+    .shop-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-small {
+      padding: 8px 16px;
+      font-size: 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-edit {
+      background: var(--warning);
+      color: white;
+    }
+    .btn-delete {
+      background: var(--danger);
+      color: white;
+    }
+    .btn-add {
+      background: var(--primary);
+      color: white;
+    }
+    .add-item-form {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      animation: slideIn 0.3s ease;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body class="blur-on">
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+    <div class="main-content">
+      <header class="topbar">
+        <div class="topbar-left" style="display:flex;align-items:center;gap:12px">
+          <button type="button" class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')" aria-label="Menyu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <div>
+            <div class="topbar-title">Do'kon boshqaruvi</div>
+            <div style="font-size:12px;color:var(--text3);">Admin</div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="coin-display" id="topCoinDisplay">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M9.5 9.5c.5-1 2-1.5 3.5-.5s1.5 2.5.5 3.5-2.5 1-3.5.5"></path>
+              <path d="M12 8v8"></path>
+            </svg>
+            <span>0 coin</span>
+          </div>
+        </div>
+      </header>
+      <div class="page-content">
+        <div class="page-header">
+          <div>
+            <h1 data-translate="shop.title">🛍️ Do'kon boshqaruvi</h1>
+            <p data-translate="shop.subtitle">Mahsulotlarni boshqaring va qo'shing</p>
+          </div>
+          <button class="btn btn-primary" onclick="toggleAddForm()">
+            ➕ Mahsulot qo'shish
+          </button>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div style="font-size: 24px; margin-bottom: 8px;">📦</div>
+            <div style="font-size: 14px; color: var(--text2);" data-translate="shop.totalProducts">Jami mahsulotlar</div>
+            <div style="font-size: 20px; font-weight: 700;" id="totalProducts">0</div>
+          </div>
+          <div class="stat-card">
+            <div style="font-size: 24px; margin-bottom: 8px;">✅</div>
+            <div style="font-size: 14px; color: var(--text2);" data-translate="shop.activeProducts">Faol mahsulotlar</div>
+            <div style="font-size: 20px; font-weight: 700;" id="activeProducts">0</div>
+          </div>
+          <div class="stat-card">
+            <div style="font-size: 24px; margin-bottom: 8px;">💰</div>
+            <div style="font-size: 14px; color: var(--text2);" data-translate="shop.totalValue">Jami qiymati</div>
+            <div style="font-size: 20px; font-weight: 700;" id="totalValue">0 🪙</div>
+          </div>
+          <div class="stat-card">
+            <div style="font-size: 24px; margin-bottom: 8px;">🛒</div>
+            <div style="font-size: 14px; color: var(--text2);" data-translate="shop.totalSales">Jami sotuvlar</div>
+            <div style="font-size: 20px; font-weight: 700;" id="totalSales">0</div>
+          </div>
+        </div>
+
+        <div id="addItemForm" class="add-item-form" style="display: none;">
+          <h3 style="margin-bottom: 20px;">➕ Yangi mahsulot qo'shish</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" data-translate="shop.itemName">Mahsulot nomi</label>
+              <input type="text" class="form-control" id="itemName" placeholder="Mahsulot nomi">
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-translate="shop.itemIcon">Ikona / Rasm</label>
+              <div class="image-upload-container">
+                <input type="text" class="form-control" id="itemIcon" placeholder="Masalan: 📦 yoki emoji">
+                <div class="image-upload-section">
+                  <label class="image-upload-label">
+                    <input type="file" id="itemImage" accept="image/*" onchange="previewImage(this)" style="display: none;">
+                    <div class="image-upload-btn">
+                      <span aria-hidden="true">📷</span>
+                      <span>Rasm yuklash</span>
+                    </div>
+                  </label>
+                  <div id="imagePreview" class="image-preview" style="display: none;">
+                    <img id="previewImg" src="" alt="Preview">
+                    <button type="button" class="remove-image-btn" onclick="removeImage()">×</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" data-translate="shop.itemPrice">Narxi (coin)</label>
+              <input type="number" class="form-control" id="itemPrice" placeholder="100">
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-translate="shop.itemStock">Soni</label>
+              <input type="number" class="form-control" id="itemStock" placeholder="10">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-translate="shop.itemDescription">Tavsif</label>
+            <textarea class="form-control" id="itemDescription" rows="3" placeholder="Mahsulot haqida qisqacha ma'lumot"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">
+              <input type="checkbox" id="itemActive" checked> 
+              <span data-translate="shop.itemActive">Faol</span>
+            </label>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-primary" onclick="addShopItem()">💾 Saqlash</button>
+            <button class="btn btn-secondary" onclick="toggleAddForm()">Bekor qilish</button>
+          </div>
+        </div>
+
+        <div id="shopItems" class="shop-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../js/translations.js"></script>
+  <script src="../../js/auth.js"></script>
+  <script src="../../js/main.js"></script>
+  <script>
+    let currentLang = 'uz';
+    
+    document.addEventListener('DOMContentLoaded', async () => {
+      await EduCoin.init();
+      const user = EduCoin.requireAuth(['admin']);
+      if (!user) return;
+      
+      // Load language settings
+      const langSettings = EduCoin.getData('langSettings') || {};
+      currentLang = langSettings.language || 'uz';
+      applyTranslations(currentLang);
+      
+      document.getElementById('sidebar-container').innerHTML = buildSidebar(user.role, user);
+      const topCoin = document.getElementById('topCoinDisplay');
+      const coinSpan = topCoin && topCoin.querySelector('span');
+      const coinText = EduCoin.formatCoins(user.coins || 0);
+      if (coinSpan) coinSpan.textContent = coinText;
+      else if (topCoin) topCoin.textContent = coinText;
+
+      loadShopItems();
+    });
+
+    function toggleAddForm() {
+      const form = document.getElementById('addItemForm');
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+
+    /** JPEG sifatida qisqartirish — localStorage 5MB chegarasida saqlash uchun */
+    function compressImageDataUrl(dataUrl, maxWidth, quality) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          let w = img.naturalWidth;
+          let h = img.naturalHeight;
+          if (w > maxWidth) {
+            h = Math.round((h * maxWidth) / w);
+            w = maxWidth;
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          try {
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          } catch {
+            resolve(dataUrl);
+          }
+        };
+        img.onerror = () => resolve(dataUrl);
+        img.src = dataUrl;
+      });
+    }
+
+    // Image upload functions
+    function previewImage(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = async function (e) {
+          const raw = e.target.result;
+          const small = await compressImageDataUrl(raw, 720, 0.82);
+          const preview = document.getElementById('imagePreview');
+          const imgEl = document.getElementById('previewImg');
+          imgEl.src = small;
+          preview.style.display = 'block';
+          document.getElementById('itemIcon').value = small;
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    function removeImage() {
+      const preview = document.getElementById('imagePreview');
+      const img = document.getElementById('previewImg');
+      const fileInput = document.getElementById('itemImage');
+      
+      preview.style.display = 'none';
+      img.src = '';
+      fileInput.value = '';
+      document.getElementById('itemIcon').value = '';
+    }
+
+    function shopItemVisual(item) {
+      const raw = item.icon || item.image || '🎁';
+      if (typeof raw === 'string' && raw.startsWith('data:')) {
+        return `<img src="${raw}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`;
+      }
+      return raw;
+    }
+
+    function loadShopItems() {
+      const container = document.getElementById('shopItems');
+      const uniqueItems = EduCoin.getShopItems();
+
+      if (!uniqueItems.length) {
+        container.innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <div class="icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            </div>
+            <p data-translate="shop.noProducts">Mahsulotlar topilmadi</p>
+            <p data-translate="shop.addFirstProduct" style="font-size:14px;color:var(--text3);margin-top:8px;">Birinchi mahsulotni qo'shing</p>
+          </div>`;
+        updateStats();
+        return;
+      }
+
+      container.innerHTML = uniqueItems
+        .map(
+          (item) => `
+            <div class="shop-item">
+              <div class="shop-item-image">${shopItemVisual(item)}</div>
+              <div class="shop-item-title">${item.name}</div>
+              <div class="shop-item-price">${EduCoin.formatCoins(item.price)}</div>
+              <div class="shop-item-stock">Soni: ${item.stock} ta</div>
+              <div style="font-size: 14px; color: var(--text2); margin-bottom: 15px;">${item.description || 'Tavsif mavjud emas'}</div>
+              <div class="shop-actions">
+                <button type="button" class="btn-small btn-edit" onclick="editItem('${item.id}')">✏️ Tahrirlash</button>
+                <button type="button" class="btn-small btn-delete" onclick="deleteItem('${item.id}')">🗑️ O'chirish</button>
+                <button type="button" class="btn-small btn-add" onclick="window.open('../../products/index.html?id=${item.id}', '_blank')">👁 Ko'rish</button>
+              </div>
+            </div>
+          `
+        )
+        .join('');
+
+      updateStats();
+    }
+
+    function addShopItem() {
+      const name = document.getElementById('itemName').value.trim();
+      const icon = document.getElementById('itemIcon').value.trim() || '🎁';
+      const price = parseInt(document.getElementById('itemPrice').value) || 0;
+      const stock = parseInt(document.getElementById('itemStock').value) || 0;
+      const description = document.getElementById('itemDescription').value.trim();
+      const active = document.getElementById('itemActive').checked;
+      
+      if (!name) {
+        showToast('Mahsulot nomini kiriting!', 'error');
+        return;
+      }
+      
+      if (price <= 0) {
+        showToast('Narhni to\'g\'ri kiriting!', 'error');
+        return;
+      }
+      
+      const newItem = {
+        name,
+        icon,
+        image: icon.startsWith('data:') ? icon : undefined,
+        price,
+        stock,
+        description,
+        active,
+        category: 'general',
+        createdAt: new Date().toISOString()
+      };
+      
+      const added = EduCoin.addShopItem(newItem);
+      if (!added) {
+        showToast('Saqlab bo\'lmadi: brauzer xotirasi to‘ldi (rasm juda katta). Boshqa rasm yoki emoji ishlating.', 'error');
+        return;
+      }
+      showToast('Mahsulot muvaffaqiyatli qo\'shildi!', 'success');
+      
+      // Clear form
+      document.getElementById('itemName').value = '';
+      document.getElementById('itemIcon').value = '';
+      document.getElementById('itemPrice').value = '';
+      document.getElementById('itemStock').value = '';
+      document.getElementById('itemDescription').value = '';
+      document.getElementById('itemActive').checked = true;
+      removeImage();
+      
+      loadShopItems();
+      updateStats();
+    }
+
+    function editItem(id) {
+      const items = EduCoin.getShopItems();
+      const item = items.find(i => i.id === id);
+      if (!item) return;
+      
+      document.getElementById('itemName').value = item.name;
+      document.getElementById('itemIcon').value = item.icon || item.image || '🎁';
+      document.getElementById('itemPrice').value = item.price;
+      document.getElementById('itemStock').value = item.stock;
+      document.getElementById('itemDescription').value = item.description || '';
+      document.getElementById('itemActive').checked = item.active;
+      
+      toggleAddForm();
+      
+      // Change button to update
+      const saveBtn = document.querySelector('#addItemForm .btn-primary');
+      saveBtn.textContent = '🔄 Yangilash';
+      saveBtn.onclick = () => updateItem(id);
+    }
+
+    function updateItem(id) {
+      const items = EduCoin.getShopItems();
+      const itemIndex = items.findIndex(i => i.id === id);
+      if (itemIndex === -1) return;
+      
+      const iconVal = document.getElementById('itemIcon').value.trim() || '🎁';
+      items[itemIndex] = {
+        ...items[itemIndex],
+        name: document.getElementById('itemName').value.trim(),
+        icon: iconVal,
+        image: iconVal.startsWith('data:') ? iconVal : items[itemIndex].image || iconVal,
+        price: parseInt(document.getElementById('itemPrice').value) || 0,
+        stock: parseInt(document.getElementById('itemStock').value) || 0,
+        description: document.getElementById('itemDescription').value.trim(),
+        active: document.getElementById('itemActive').checked
+      };
+      
+      if (!EduCoin.setData('shop', items)) {
+        showToast('Saqlab bo\'lmadi: xotira to‘ldi.', 'error');
+        return;
+      }
+      showToast('Mahsulot yangilandi!', 'success');
+      
+      // Reset form
+      toggleAddForm();
+      loadShopItems();
+      updateStats();
+    }
+
+    function deleteItem(id) {
+      if (!confirm('Mahsulotni o\'chirishni hohlaysizmi?')) return;
+      
+      const items = EduCoin.getShopItems();
+      const filtered = items.filter(i => i.id !== id);
+      EduCoin.addShopRemovedId(id);
+      if (!EduCoin.setData('shop', filtered)) {
+        showToast('O\'chirishni saqlab bo\'lmadi.', 'error');
+        return;
+      }
+
+      showToast('Mahsulot o\'chirildi!', 'success');
+      loadShopItems();
+      updateStats();
+    }
+
+    function updateStats() {
+      const items = EduCoin.getShopItems();
+      const activeItems = items.filter(i => i.active);
+      const totalValue = items.reduce((sum, item) => sum + (item.price * item.stock), 0);
+      const purchases = EduCoin.getData('purchases') || [];
+      
+      document.getElementById('totalProducts').textContent = items.length;
+      document.getElementById('activeProducts').textContent = activeItems.length;
+      document.getElementById('totalValue').textContent = EduCoin.formatCoins(totalValue);
+      document.getElementById('totalSales').textContent = purchases.length;
+    }
+  </script>
+</body>
+</html>

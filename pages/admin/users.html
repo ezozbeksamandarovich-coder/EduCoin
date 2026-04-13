@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="EduCoin — ta'lim mukofot tizimi">
+  <meta name="theme-color" content="#050A05">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <title>EduCoin — Foydalanuvchilar</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/dashboard.css">
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+    <div class="main-content">
+      <header class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+          <div class="topbar-title">👥 Foydalanuvchilar</div>
+        </div>
+        <div class="topbar-right"><span class="badge badge-danger">ADMIN</span></div>
+      </header>
+      <div class="page-content">
+        <div class="page-header">
+          <div><h1>👥 Barcha foydalanuvchilar</h1><p>Tizimda ro'yxatdan o'tgan barcha userlar</p></div>
+          <button class="btn btn-primary" onclick="openModal('addUserModal')">➕ Yangi user</button>
+        </div>
+
+        <div class="search-filter-row">
+          <div class="search-bar">
+            <span>🔍</span>
+            <input type="text" id="searchInput" placeholder="Ism yoki username..." oninput="filterUsers()">
+          </div>
+          <select class="form-control role-filter" id="roleFilter" onchange="filterUsers()">
+            <option value="">Barcha rollar</option>
+            <option value="student">O'quvchi</option>
+            <option value="teacher">O'qituvchi</option>
+            <option value="manager">Menejer</option>
+            <option value="director">Direktor</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+
+        <div class="table-wrap">
+          <table id="usersTable">
+            <thead><tr><th>#</th><th>Ism</th><th>Username</th><th>Rol</th><th>Balans</th><th>Holat</th><th>Amallar</th></tr></thead>
+            <tbody id="usersBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add User Modal -->
+  <div class="modal-overlay" id="addUserModal">
+    <div class="modal">
+      <div class="modal-header"><div class="modal-title">➕ Yangi foydalanuvchi</div><button class="modal-close" onclick="closeModal('addUserModal')">×</button></div>
+      <div class="modal-body">
+        <div id="addAlert"></div>
+        <div class="form-group"><label class="form-label">To'liq ism</label><input type="text" class="form-control" id="newName" placeholder="Jasur Nazarov"></div>
+        <div class="form-group"><label class="form-label">Username</label><input type="text" class="form-control" id="newUsername" placeholder="jasur01"></div>
+        <div class="form-group"><label class="form-label">Parol</label><input type="text" class="form-control" id="newPassword" placeholder="Parol"></div>
+        <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-control" id="newEmail" placeholder="email@example.com"></div>
+        <div class="form-group"><label class="form-label">Rol</label>
+          <select class="form-control" id="newRole">
+            <option value="student">O'quvchi</option>
+            <option value="teacher">O'qituvchi</option>
+            <option value="manager">Menejer</option>
+            <option value="director">Direktor</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('addUserModal')">Bekor</button>
+        <button class="btn btn-primary" onclick="addUser()">➕ Qo'shish</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../js/auth.js"></script>
+  <script src="../../js/main.js"></script>
+  <script>
+    let allUsers = [];
+    const roleLabels={student:"O'quvchi",teacher:"O'qituvchi",manager:"Menejer",director:"Direktor",admin:"Admin"};
+    const roleColors={student:'#4CAF50',teacher:'#2196F3',manager:'#FF9800',director:'#9C27B0',admin:'#F44336'};
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await EduCoin.init();
+      const user = EduCoin.requireAuth(['admin']);
+      if (!user) return;
+      document.getElementById('sidebar-container').innerHTML = buildSidebar('admin', user);
+      allUsers = EduCoin.getUsers();
+      renderUsers(allUsers);
+    });
+
+    function filterUsers() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      const role = document.getElementById('roleFilter').value;
+      let filtered = allUsers;
+      if (q) filtered = filtered.filter(u=>u.name.toLowerCase().includes(q)||u.username.toLowerCase().includes(q));
+      if (role) filtered = filtered.filter(u=>u.role===role);
+      renderUsers(filtered);
+    }
+
+    function renderUsers(users) {
+      document.getElementById('usersBody').innerHTML = users.map((u,i) => `<tr>
+        <td class="table-index">${i+1}</td>
+        <td><div class="user-avatar-cell">
+          <div class="user-avatar">${getInitials(u.name)}</div>
+          <div class="user-info"><div class="user-name">${u.name}</div><div class="user-email">${u.email||'—'}</div></div>
+        </div></td>
+        <td class="username-cell">${u.username}</td>
+        <td><span class="badge role-badge" data-role="${u.role}">${roleLabels[u.role]}</span></td>
+        <td class="coins-cell">${(u.coins||0).toLocaleString()} 🪙</td>
+        <td><span class="badge ${u.active ? 'badge-success' : 'badge-danger'}">${u.active ? 'Faol' : 'Bloklangan'}</span></td>
+        <td>
+          <div class="action-buttons">
+            <button class="btn btn-warning btn-sm" onclick="toggleUser('${u.id}')">${u.active ? '🔒' : '🔓'}</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}')">🗑️</button>
+          </div>
+        </td>
+      </tr>`).join('');
+    }
+
+    function toggleUser(id) {
+      const user = EduCoin.getUserById(id);
+      if (!user) return;
+      if (user.role === 'admin') { showToast('Admin bloklanmaydi!', 'error'); return; }
+      EduCoin.updateUser(id, { active: !user.active });
+      allUsers = EduCoin.getUsers();
+      filterUsers();
+      showToast(user.active ? 'Foydalanuvchi bloklandi' : 'Foydalanuvchi faollashtirildi', 'info');
+    }
+
+    function deleteUser(id) {
+      const user = EduCoin.getUserById(id);
+      if (!user || user.role === 'admin') { showToast('Adminni o\'chirish mumkin emas!', 'error'); return; }
+      if (!confirm(`${user.name}ni o'chirishni tasdiqlaysizmi?`)) return;
+      const users = EduCoin.getUsers().filter(u => u.id !== id);
+      EduCoin.setData('users', users);
+      allUsers = EduCoin.getUsers();
+      filterUsers();
+      showToast('Foydalanuvchi o\'chirildi', 'success');
+    }
+
+    function addUser() {
+      const name = document.getElementById('newName').value.trim();
+      const username = document.getElementById('newUsername').value.trim();
+      const password = document.getElementById('newPassword').value;
+      const email = document.getElementById('newEmail').value.trim();
+      const role = document.getElementById('newRole').value;
+      const el = document.getElementById('addAlert');
+      if (!name||!username||!password) { el.innerHTML='<div class="alert alert-danger">Barcha maydonlarni to\'ldiring!</div>'; return; }
+      if (EduCoin.getUsers().find(u=>u.username===username)) { el.innerHTML='<div class="alert alert-danger">Bu username band!</div>'; return; }
+      EduCoin.addUser({name,username,password,email,role});
+      allUsers = EduCoin.getUsers();
+      filterUsers();
+      closeModal('addUserModal');
+      showToast(`${name} qo'shildi!`, 'success');
+    }
+  </script>
+</body>
+</html>

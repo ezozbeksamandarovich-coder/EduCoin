@@ -1,0 +1,94 @@
+[
+  {
+    "id": "t001",
+    "type": "award",
+    "fromId": "u003",
+    "toId": "u004",
+    "amount": 120,
+    "reason": "Darsdagi faollik",
+    "createdAt": "2024-03-01T10:00:00Z"
+  },
+  {
+    "id": "t002",
+    "type": "award",
+    "fromId": "u003",
+    "toId": "u006",
+    "amount": 90,
+    "reason": "Uy vazifasi a'lo bajarildi",
+    "createdAt": "2024-03-02T11:00:00Z"
+  },
+  {
+    "id": "t003",
+    "type": "purchase",
+    "fromId": "u007",
+    "toId": "system",
+    "amount": -200,
+    "itemId": "s002",
+    "reason": "Bonus Dars sotib olindi",
+    "createdAt": "2024-03-03T14:00:00Z"
+  },
+  {
+    "id": "t004",
+    "type": "transfer",
+    "fromId": "u004",
+    "toId": "u006",
+    "amount": 40,
+    "reason": "Hamkorlik uchun sovg'a",
+    "createdAt": "2024-03-04T09:00:00Z"
+  },
+  {
+    "id": "t005",
+    "type": "award",
+    "fromId": "u002",
+    "toId": "u003",
+    "amount": 300,
+    "reason": "Mentorlik natijasi",
+    "createdAt": "2024-03-05T15:00:00Z"
+  },
+  {
+    "id": "t006",
+    "type": "award",
+    "fromId": "u011",
+    "toId": "u009",
+    "amount": 110,
+    "reason": "Olimpiadaga tayyorgarlik",
+    "createdAt": "2024-03-06T10:00:00Z"
+  },
+  {
+    "id": "t007",
+    "type": "award",
+    "fromId": "u005",
+    "toId": "u010",
+    "amount": 80,
+    "reason": "Loyiha taqdimoti",
+    "createdAt": "2024-03-07T11:00:00Z"
+  },
+  {
+    "id": "t008",
+    "type": "purchase",
+    "fromId": "u010",
+    "toId": "system",
+    "amount": -150,
+    "itemId": "s003",
+    "reason": "Premium Daftar sotib olindi",
+    "createdAt": "2024-03-08T16:00:00Z"
+  },
+  {
+    "id": "t009",
+    "type": "award",
+    "fromId": "u011",
+    "toId": "u008",
+    "amount": 150,
+    "reason": "Speaking club yetakchisi",
+    "createdAt": "2024-03-09T13:00:00Z"
+  },
+  {
+    "id": "t010",
+    "type": "award",
+    "fromId": "u003",
+    "toId": "u007",
+    "amount": 70,
+    "reason": "Mini loyiha topshirildi",
+    "createdAt": "2024-03-10T17:00:00Z"
+  }
+]
