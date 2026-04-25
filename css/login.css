@@ -12,6 +12,7 @@ body {
   min-height: 100vh;
   display: flex; align-items: center; justify-content: center;
   overflow: hidden;
+  padding: 16px;
 }
 
 /* === BACKGROUND EFFECTS === */
@@ -40,6 +41,98 @@ body {
 }
 
 /* === LOGIN CONTAINER === */
+.page-shell {
+  position: relative;
+  z-index: 1;
+  width: min(1120px, 100%);
+  display: grid;
+  grid-template-columns: 1fr 440px;
+  gap: 20px;
+  align-items: stretch;
+}
+
+.promo-panel {
+  background: linear-gradient(170deg, rgba(0,255,136,0.15), rgba(0,255,136,0.04));
+  border: 1px solid rgba(0,255,136,0.18);
+  border-radius: 24px;
+  padding: 36px;
+  box-shadow: 0 20px 70px rgba(0,0,0,0.5);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+}
+
+.promo-badge {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(0,255,136,0.16);
+  color: #00FFAA;
+  margin-bottom: 16px;
+}
+
+.promo-panel h2 {
+  font-size: 34px;
+  line-height: 1.15;
+  margin-bottom: 14px;
+}
+
+.promo-panel p {
+  color: #9AC89A;
+  margin-bottom: 20px;
+}
+
+.promo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.promo-item {
+  background: rgba(0,0,0,0.24);
+  border: 1px solid rgba(0,255,136,0.16);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.promo-item strong {
+  display: block;
+  color: #00FF88;
+  font-size: 18px;
+}
+
+.promo-item span {
+  font-size: 12px;
+  color: #85B885;
+}
+
+.feature-list {
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.feature-list li {
+  position: relative;
+  padding-left: 22px;
+  color: #A7CFA7;
+  font-size: 14px;
+}
+
+.feature-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 12px;
+  height: 2px;
+  background: #00FF88;
+  border-radius: 99px;
+}
+
 .login-container { position: relative; z-index: 1; width: 100%; max-width: 440px; padding: 20px; }
 
 .login-card {
@@ -95,6 +188,20 @@ body {
   background: #00FF88;
   border-radius: 50%;
 }
+.login-logo .landing-link-row {
+  margin-top: 10px;
+}
+.login-logo .landing-link-row::before {
+  content: none;
+}
+.landing-link {
+  color: #00FF88;
+  text-decoration: none;
+  font-weight: 600;
+}
+.landing-link:hover {
+  color: #66ffc0;
+}
 
 /* === ERROR MESSAGE === */
 .error-msg {
@@ -139,6 +246,24 @@ body {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
+}
+
+.ghost-btn {
+  border: 1px solid rgba(0,255,136,0.25);
+  background: rgba(0,255,136,0.06);
+  color: #9BE6BE;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 8px 10px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.ghost-btn:hover {
+  border-color: rgba(0,255,136,0.42);
+  background: rgba(0,255,136,0.12);
 }
 .remember-label {
   display: flex;
@@ -186,6 +311,47 @@ body {
   display: flex; align-items: center; transition: color 0.2s;
 }
 .eye-btn:hover { color: #00FF88; }
+
+.caps-warning {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  color: #FFB347;
+  background: rgba(255,179,71,0.1);
+  border: 1px solid rgba(255,179,71,0.3);
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+.caps-warning.show {
+  display: flex;
+}
+
+.password-strength {
+  margin: -2px 0 12px;
+}
+
+.strength-bar {
+  height: 6px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.strength-bar span {
+  display: block;
+  height: 100%;
+  width: 0;
+  transition: width 0.25s ease, background-color 0.25s ease;
+}
+
+.password-strength small {
+  color: #80A680;
+  font-size: 11px;
+}
 
 /* === LOGIN BUTTON === */
 .btn-login {
@@ -295,6 +461,17 @@ body {
 @media (max-width: 480px) {
   .login-card { padding: 32px 24px; border-radius: 20px; }
   .login-logo h1 { font-size: 26px; }
+}
+
+@media (max-width: 980px) {
+  .page-shell {
+    grid-template-columns: 1fr;
+    max-width: 500px;
+  }
+
+  .promo-panel {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

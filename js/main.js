@@ -162,10 +162,12 @@ function buildSidebar(role, currentUser) {
     ],
     admin: [
       { icon: 'home', label: 'Bosh sahifa', href: 'dashboard.html' },
-      { icon: 'users', label: 'Foydalanuvchilar', href: 'users.html' },
+      { icon: 'coins', label: 'EduCoinlar', href: 'coins.html' },
+      { icon: 'rating', label: 'Reyting', href: 'rating.html' },
+      { icon: 'shop', label: "Do'kon", href: 'shop.html' },
       { icon: 'passwords', label: 'Login & Parollar', href: 'passwords.html' },
-      { icon: 'database', label: 'Database', href: 'database.html' },
       { icon: 'reports', label: 'Hisobotlar', href: 'reports.html' },
+      { icon: 'database', label: 'Database', href: 'database.html' },
       { icon: 'settings', label: 'Sozlamalar', href: 'settings.html' },
       { icon: 'profile', label: 'Profil', href: 'profile.html' },
     ],
@@ -175,6 +177,7 @@ function buildSidebar(role, currentUser) {
   const roleColors = { student: '#4CAF50', teacher: '#2196F3', manager: '#FF9800', director: '#9C27B0', admin: '#F44336' };
   const navItems = navConfigs[role] || [];
   const currentPath = window.location.pathname.split('/').pop();
+  const rootPath = window.location.pathname.includes('/pages/') ? '../../' : './';
 
   return `
     <aside class="sidebar" id="sidebar">
@@ -201,6 +204,10 @@ function buildSidebar(role, currentUser) {
         `).join('')}
       </nav>
       <div class="sidebar-footer">
+        <a class="btn btn-secondary btn-full" href="${rootPath}landing.html" style="margin-bottom:10px;">
+          <span class="nav-icon">${getUiIcon('home')}</span>
+          <span>Landing sahifa</span>
+        </a>
         <button class="btn-logout" onclick="EduCoin.logout()">
           <span class="nav-icon">${getUiIcon('logout')}</span>
           <span>Chiqish</span>

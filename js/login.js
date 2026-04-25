@@ -34,6 +34,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const eyeBtn = document.getElementById('eyeBtn');
   const rememberedUsername = EduCoin.getRememberedUsername ? EduCoin.getRememberedUsername() : '';
   const rememberCheckbox = document.getElementById('rememberMe');
+  const capsWarning = document.getElementById('capsWarning');
+  const strengthWrap = document.getElementById('passwordStrength');
+  const strengthBar = strengthWrap ? strengthWrap.querySelector('.strength-bar span') : null;
+  const strengthText = strengthWrap ? strengthWrap.querySelector('small b') : null;
 
   if (rememberCheckbox) {
     rememberCheckbox.checked = localStorage.getItem('educoin_remember_me') === 'true';
@@ -100,7 +104,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Creatures get excited when typing
     creatures.forEach((creature, index) => {
-      const eyes = creature.querySelectorAll('.eye::before');
       const intensity = Math.min(value.length / 10, 1);
       
       // Make eyes move faster and more erratically when typing
@@ -130,7 +133,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       
       // Increase pulse rate with password length
       const creatureBody = creature.querySelector('.creature-body');
-      creatureBody.style.animationDuration = `${3 - alertness * 1.5}s`;
+      if (creatureBody) {
+        creatureBody.style.animationDuration = `${3 - alertness * 1.5}s`;
+      }
       
       // Make creatures lean in when password is being typed
       if (value.length > 0) {
@@ -139,8 +144,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         creature.style.transform = '';
       }
     });
+
+    const strength = calculatePasswordStrength(value);
+    if (strengthBar && strengthText) {
+      strengthBar.style.width = `${strength.percent}%`;
+      strengthBar.style.backgroundColor = strength.color;
+      strengthText.textContent = strength.label;
+      strengthText.style.color = strength.color;
+    }
   });
-  
+
+  passwordInput.addEventListener('keyup', (e) => {
+    if (!capsWarning) return;
+    const capsOn = e.getModifierState && e.getModifierState('CapsLock');
+    capsWarning.classList.toggle('show', !!capsOn);
+  });
+
+  passwordInput.addEventListener('blur', () => {
+    if (capsWarning) capsWarning.classList.remove('show');
+  });
+
   // Focus effects
   usernameInput.addEventListener('focus', () => {
     document.querySelectorAll('.creature').forEach((creature, index) => {
@@ -192,7 +215,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Simulate small delay for UX
     await new Promise(r => setTimeout(r, 600));
 
-    const user = EduCoin.login(username, password);
+    const user = await EduCoin.login(username, password);
 
     if (user) {
       loginBtn.innerHTML = `
@@ -232,8 +255,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const eyes = creature.querySelectorAll('.eye');
         
         // Make creatures droop
-        creatureBody.style.transform = 'scale(0.8) translateY(10px)';
-        creatureBody.style.opacity = '0.5';
+        if (creatureBody) {
+          creatureBody.style.transform = 'scale(0.8) translateY(10px)';
+          creatureBody.style.opacity = '0.5';
+        }
         
         // Eyes look down (sad)
         eyes.forEach(eye => {
@@ -243,8 +268,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         // Reset after 2 seconds
         setTimeout(() => {
-          creatureBody.style.transform = '';
-          creatureBody.style.opacity = '';
+          if (creatureBody) {
+            creatureBody.style.transform = '';
+            creatureBody.style.opacity = '';
+          }
           eyes.forEach(eye => {
             eye.style.transform = '';
             eye.style.opacity = '';
@@ -269,56 +296,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, 3000);
   }
 
-  // Password file upload functionality
-  document.getElementById('passwordFile').addEventListener('change', function(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      try {
-        const data = JSON.parse(e.target.result);
-        
-        if (Array.isArray(data)) {
-          // Update users with new passwords
-          const users = EduCoin.getUsers();
-          let updatedCount = 0;
-          
-          data.forEach(userUpdate => {
-            const userIndex = users.findIndex(u => u.username === userUpdate.username);
-            if (userIndex !== -1) {
-              users[userIndex].password = userUpdate.password;
-              updatedCount++;
-            }
-          });
-          
-          if (updatedCount > 0) {
-            EduCoin.setData('users', users);
-            document.getElementById('uploadStatus').innerHTML = `<div class="alert alert-success">✅ ${updatedCount} ta foydalanuvchi paroli muvaffaqiyatli yangilandi!</div>`;
-            showToast(`${updatedCount} ta parol yangilandi!`, 'success');
-          } else {
-            document.getElementById('uploadStatus').innerHTML = `<div class="alert alert-warning">⚠️ Hech qanday foydalanuvchi topilmadi!</div>`;
-          }
-        } else {
-          document.getElementById('uploadStatus').innerHTML = `<div class="alert alert-danger">⚠️ Noto'g'ri JSON format!</div>`;
-        }
-      } catch (error) {
-        document.getElementById('uploadStatus').innerHTML = `<div class="alert alert-danger">⚠️ Faylni o'qib bo'lishda xatolik yuz berdi!</div>`;
-      }
-    };
-    
-    reader.readAsText(file);
-  });
 });
 
-// Demo account quick-fill
-function fillDemo(username, password) {
-  document.getElementById('username').value = username;
-  document.getElementById('password').value = password;
-  const form = document.getElementById('loginForm');
-  if (form.requestSubmit) {
-    form.requestSubmit();
-  } else {
-    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+function calculatePasswordStrength(value) {
+  if (!value) {
+    return { percent: 0, label: '—', color: '#5A9A5A' };
   }
+
+  let score = 0;
+  if (value.length >= 6) score += 20;
+  if (value.length >= 10) score += 20;
+  if (/[A-Z]/.test(value)) score += 20;
+  if (/[0-9]/.test(value)) score += 20;
+  if (/[^A-Za-z0-9]/.test(value)) score += 20;
+
+  if (score <= 20) return { percent: 20, label: 'Juda past', color: '#FF5252' };
+  if (score <= 40) return { percent: 40, label: 'Past', color: '#FF8A65' };
+  if (score <= 60) return { percent: 60, label: 'O‘rtacha', color: '#FFB347' };
+  if (score <= 80) return { percent: 80, label: 'Yaxshi', color: '#8BC34A' };
+  return { percent: 100, label: 'Kuchli', color: '#00FF88' };
 }
+

@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduCoin | Yangi avlod ta'lim platformasi</title>
+  <meta name="description" content="EduCoin platformasi uchun zamonaviy landing page">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:       #22C55E;
+      --green-light: #4ADE80;
+      --green-dim:   #16A34A;
+      --green-glow:  rgba(34,197,94,.18);
+      --dark:        #050A07;
+      --dark2:       #0C140E;
+      --dark3:       #121F14;
+      --dark4:       #192B1C;
+      --text:        #E4F0E8;
+      --muted:       #6B9075;
+      --radius:      18px;
+      --radius-sm:   10px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* ── GRAIN OVERLAY ── */
+    body::after {
+      content: '';
+      position: fixed; inset: 0; z-index: 9998; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)' opacity='0.045'/%3E%3C/svg%3E");
+      opacity: .5;
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--dark); }
+    ::-webkit-scrollbar-thumb { background: var(--green-dim); border-radius: 4px; }
+
+    /* ════════════════════════════════
+       TOPBAR
+    ════════════════════════════════ */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 56px;
+      background: rgba(5,10,7,.65);
+      backdrop-filter: blur(20px) saturate(160%);
+      border-bottom: 1px solid rgba(34,197,94,.1);
+      transition: padding .3s ease, background .3s ease;
+      animation: slideDown .6s ease both;
+    }
+    .topbar.scrolled {
+      padding: 12px 56px;
+      background: rgba(5,10,7,.92);
+    }
+
+    .brand {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.55rem; font-weight: 800; letter-spacing: -.5px;
+      color: var(--text); text-decoration: none;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .brand-icon {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--green-dim), var(--green-light));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .brand span { color: var(--green-light); }
+
+    .menu { display: flex; align-items: center; gap: 40px; }
+    .menu a {
+      color: var(--muted); text-decoration: none;
+      font-size: .9rem; font-weight: 500; letter-spacing: .02em;
+      transition: color .25s; position: relative;
+    }
+    .menu a::after {
+      content: ''; position: absolute; bottom: -4px; left: 0;
+      width: 0; height: 1.5px; background: var(--green);
+      transition: width .3s ease;
+    }
+    .menu a:hover { color: var(--text); }
+    .menu a:hover::after { width: 100%; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 11px 24px; border-radius: 50px;
+      font-family: 'DM Sans', sans-serif; font-size: .9rem; font-weight: 500;
+      text-decoration: none; cursor: pointer; border: none;
+      transition: all .25s ease; white-space: nowrap;
+    }
+    .btn svg { flex-shrink: 0; }
+    .btn-outline {
+      border: 1.5px solid rgba(34,197,94,.35); color: var(--green-light);
+      background: transparent;
+    }
+    .btn-outline:hover { background: rgba(34,197,94,.1); border-color: var(--green); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--green-dim), var(--green));
+      color: #fff; font-weight: 600;
+      box-shadow: 0 0 28px rgba(34,197,94,.3);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 48px rgba(34,197,94,.5);
+      filter: brightness(1.08);
+    }
+    .btn-ghost {
+      background: rgba(255,255,255,.05); color: var(--text);
+      border: 1px solid rgba(255,255,255,.1);
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,.1); }
+
+    /* ════════════════════════════════
+       HERO
+    ════════════════════════════════ */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 130px 24px 80px;
+      position: relative; overflow: hidden;
+    }
+
+    /* animated orbs */
+    .orb {
+      position: absolute; border-radius: 50%;
+      pointer-events: none; filter: blur(80px);
+    }
+    .orb-1 {
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(34,197,94,.16), transparent 70%);
+      top: 50%; left: 50%; transform: translate(-50%,-58%);
+      animation: orbFloat 6s ease-in-out infinite alternate;
+    }
+    .orb-2 {
+      width: 380px; height: 380px;
+      background: radial-gradient(circle, rgba(22,163,74,.12), transparent 70%);
+      bottom: 5%; right: 5%;
+      animation: orbFloat 8s 2s ease-in-out infinite alternate;
+    }
+    .orb-3 {
+      width: 250px; height: 250px;
+      background: radial-gradient(circle, rgba(74,222,128,.08), transparent 70%);
+      top: 20%; left: 5%;
+      animation: orbFloat 7s 1s ease-in-out infinite alternate;
+    }
+    @keyframes orbFloat {
+      from { transform: translate(0,0) scale(1); }
+      to   { transform: translate(20px,20px) scale(1.08); }
+    }
+
+    /* grid lines */
+    .hero-grid {
+      position: absolute; inset: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(34,197,94,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34,197,94,.04) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black, transparent);
+    }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(34,197,94,.1); border: 1px solid rgba(34,197,94,.25);
+      color: var(--green-light); padding: 6px 18px; border-radius: 50px;
+      font-size: .78rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+      animation: fadeUp .5s .1s ease both;
+      position: relative; z-index: 1;
+    }
+    .badge-dot {
+      width: 7px; height: 7px; border-radius: 50%; background: var(--green);
+      animation: blink 1.6s infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.6rem, 7vw, 5.8rem);
+      font-weight: 800; line-height: 1.04; letter-spacing: -.035em;
+      margin: 26px 0 22px;
+      background: linear-gradient(160deg, #fff 30%, var(--green-light) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: fadeUp .6s .2s ease both;
+      position: relative; z-index: 1;
+    }
+
+    .subtitle {
+      max-width: 560px; color: var(--muted);
+      font-size: 1.05rem; line-height: 1.72;
+      animation: fadeUp .6s .3s ease both;
+      position: relative; z-index: 1;
+    }
+
+    .hero-actions {
+      display: flex; gap: 14px; margin-top: 36px;
+      animation: fadeUp .6s .4s ease both;
+      position: relative; z-index: 1;
+    }
+    .hero-actions .btn { padding: 14px 30px; font-size: 1rem; }
+
+    .stats {
+      display: flex; gap: 56px; margin-top: 76px;
+      animation: fadeUp .6s .55s ease both;
+      position: relative; z-index: 1;
+    }
+    .stats article { text-align: center; }
+    .stats strong {
+      display: block;
+      font-family: 'Syne', sans-serif; font-size: 2.1rem; font-weight: 800;
+      color: var(--green-light);
+    }
+    .stats span {
+      font-size: .8rem; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .1em; margin-top: 2px; display: block;
+    }
+    .stats-divider {
+      width: 1px; background: rgba(34,197,94,.15); align-self: stretch;
+    }
+
+    /* scroll indicator */
+    .scroll-hint {
+      position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      color: var(--muted); z-index: 1;
+      animation: fadeUp .6s .8s ease both;
+    }
+    .scroll-line {
+      width: 1px; height: 52px;
+      background: linear-gradient(to bottom, var(--green), transparent);
+      animation: scrollDrop 1.8s ease-in-out infinite;
+    }
+    @keyframes scrollDrop {
+      0%   { transform: scaleY(0); transform-origin: top; opacity: 1; }
+      49%  { transform: scaleY(1); transform-origin: top; opacity: 1; }
+      50%  { transform-origin: bottom; }
+      100% { transform: scaleY(0); transform-origin: bottom; opacity: 0; }
+    }
+
+    /* ════════════════════════════════
+       SECTION COMMONS
+    ════════════════════════════════ */
+    .section-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      color: var(--green); font-size: .75rem; font-weight: 700;
+      letter-spacing: .14em; text-transform: uppercase; margin-bottom: 14px;
+    }
+    .section-tag-line {
+      width: 28px; height: 1.5px; background: var(--green);
+    }
+
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.9rem, 4vw, 3.2rem);
+      font-weight: 800; letter-spacing: -.03em;
+      margin-bottom: 56px; line-height: 1.1;
+    }
+
+    /* ════════════════════════════════
+       FEATURES
+    ════════════════════════════════ */
+    .features {
+      padding: 110px 56px;
+      max-width: 1160px; margin: 0 auto;
+      position: relative;
+    }
+
+    .cards {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px;
+    }
+
+    .card {
+      background: var(--dark2);
+      border: 1px solid rgba(34,197,94,.08);
+      border-radius: var(--radius);
+      padding: 36px 28px;
+      position: relative; overflow: hidden;
+      transition: transform .35s ease, border-color .35s ease, box-shadow .35s ease;
+      cursor: default;
+    }
+    .card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 0% 0%, rgba(34,197,94,.1), transparent 60%);
+      opacity: 0; transition: opacity .4s;
+    }
+    .card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(34,197,94,.28);
+      box-shadow: 0 24px 64px rgba(0,0,0,.5), 0 0 0 1px rgba(34,197,94,.08);
+    }
+    .card:hover::before { opacity: 1; }
+
+    .card-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      background: rgba(34,197,94,.1); border: 1px solid rgba(34,197,94,.2);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 22px; transition: background .3s, transform .3s;
+    }
+    .card:hover .card-icon {
+      background: rgba(34,197,94,.18);
+      transform: scale(1.08);
+    }
+    .card-icon svg { color: var(--green-light); }
+
+    .card h3 {
+      font-family: 'Syne', sans-serif; font-size: 1.15rem; font-weight: 700;
+      margin-bottom: 12px; color: #fff;
+    }
+    .card p { color: var(--muted); font-size: .92rem; line-height: 1.68; }
+
+    /* ════════════════════════════════
+       PLANS
+    ════════════════════════════════ */
+    .plans-wrapper {
+      background: linear-gradient(to bottom, var(--dark), var(--dark2) 40%, var(--dark));
+      padding: 110px 56px;
+      position: relative; overflow: hidden;
+    }
+    .plans-wrapper::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(34,197,94,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34,197,94,.03) 1px, transparent 1px);
+      background-size: 64px 64px;
+    }
+    .plans-inner { max-width: 1160px; margin: 0 auto; position: relative; }
+
+    .plan-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px;
+    }
+
+    .plan {
+      background: var(--dark3); border-radius: var(--radius);
+      border: 1px solid rgba(34,197,94,.1);
+      padding: 40px 32px;
+      transition: transform .3s, box-shadow .3s;
+      position: relative;
+    }
+    .plan:hover { transform: translateY(-6px); box-shadow: 0 20px 56px rgba(0,0,0,.5); }
+    .plan.featured {
+      background: linear-gradient(145deg, #0d1f10, #132018);
+      border-color: var(--green-dim);
+      box-shadow: 0 0 80px rgba(34,197,94,.15);
+    }
+    .plan.featured::before {
+      content: 'TAVSIYA ETILADI';
+      position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+      background: linear-gradient(90deg, var(--green-dim), var(--green));
+      color: #fff;
+      font-size: .65rem; font-weight: 800; letter-spacing: .12em;
+      padding: 5px 18px; border-radius: 50px; white-space: nowrap;
+    }
+
+    .plan-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+    .plan-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: rgba(34,197,94,.1); border: 1px solid rgba(34,197,94,.2);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .plan-icon svg { color: var(--green); }
+
+    .plan h3 {
+      font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700;
+      color: var(--muted); text-transform: uppercase; letter-spacing: .1em;
+    }
+    .plan.featured h3 { color: var(--green-light); }
+
+    .price {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.1rem; font-weight: 800; color: #fff;
+      margin-bottom: 8px;
+    }
+    .price-note { font-size: .82rem; color: var(--muted); margin-bottom: 28px; }
+    .plan.featured .price { color: var(--green-light); }
+
+    .plan-divider { height: 1px; background: rgba(34,197,94,.1); margin-bottom: 24px; }
+
+    .plan ul { list-style: none; display: flex; flex-direction: column; gap: 13px; }
+    .plan ul li {
+      font-size: .9rem; color: var(--muted);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .plan ul li svg { color: var(--green); flex-shrink: 0; }
+
+    /* ════════════════════════════════
+       DOWNLOAD
+    ════════════════════════════════ */
+    .download {
+      padding: 110px 56px;
+      max-width: 1160px; margin: 0 auto;
+    }
+    .download-subtitle {
+      color: var(--muted); max-width: 500px;
+      font-size: .95rem; line-height: 1.7; margin-bottom: 52px;
+    }
+    .download-subtitle code {
+      color: var(--green-light);
+      background: rgba(34,197,94,.1); padding: 2px 7px;
+      border-radius: 5px; font-family: 'Courier New', monospace;
+    }
+    .download-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px;
+    }
+    .download-card {
+      background: var(--dark2); border-radius: var(--radius);
+      border: 1px solid rgba(34,197,94,.08);
+      padding: 36px 28px;
+      display: flex; flex-direction: column; gap: 14px;
+      transition: transform .3s, box-shadow .3s, border-color .3s;
+    }
+    .download-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 56px rgba(0,0,0,.5);
+      border-color: rgba(34,197,94,.2);
+    }
+    .download-card-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      background: rgba(34,197,94,.1); border: 1px solid rgba(34,197,94,.15);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .download-card-icon svg { color: var(--green-light); }
+    .download-card h3 {
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.05rem;
+    }
+    .download-card p { color: var(--muted); font-size: .9rem; line-height: 1.65; flex: 1; }
+    .download-card .btn { margin-top: auto; align-self: flex-start; }
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: .78rem; color: var(--green); font-weight: 600;
+      background: rgba(34,197,94,.1); border: 1px solid rgba(34,197,94,.2);
+      padding: 4px 12px; border-radius: 6px; width: fit-content;
+    }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 1.6s infinite; }
+
+    /* ════════════════════════════════
+       CODE BLOCK (Copy Feature)
+    ════════════════════════════════ */
+    .code-section {
+      background: var(--dark2); padding: 110px 56px;
+      border-top: 1px solid rgba(34,197,94,.08);
+      border-bottom: 1px solid rgba(34,197,94,.08);
+    }
+    .code-inner { max-width: 1160px; margin: 0 auto; }
+
+    .code-block {
+      background: var(--dark); border-radius: var(--radius);
+      border: 1px solid rgba(34,197,94,.15);
+      overflow: hidden;
+    }
+    .code-topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 20px;
+      background: rgba(34,197,94,.05);
+      border-bottom: 1px solid rgba(34,197,94,.1);
+    }
+    .code-dots { display: flex; gap: 7px; }
+    .code-dots span {
+      width: 12px; height: 12px; border-radius: 50%;
+    }
+    .code-dots span:nth-child(1) { background: #ff5f57; }
+    .code-dots span:nth-child(2) { background: #febc2e; }
+    .code-dots span:nth-child(3) { background: #28c840; }
+    .code-lang {
+      font-size: .78rem; color: var(--muted); font-family: monospace; letter-spacing: .05em;
+    }
+    .copy-btn {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(34,197,94,.1); border: 1px solid rgba(34,197,94,.2);
+      color: var(--green-light); padding: 6px 14px; border-radius: 7px;
+      font-size: .8rem; font-weight: 600; cursor: pointer;
+      transition: all .25s; font-family: 'DM Sans', sans-serif;
+    }
+    .copy-btn:hover { background: rgba(34,197,94,.2); }
+    .copy-btn.copied { color: #fff; background: var(--green-dim); border-color: var(--green); }
+    pre {
+      padding: 28px 24px; overflow-x: auto;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: .85rem; line-height: 1.75; color: #a8d8b5;
+    }
+    pre .kw  { color: var(--green-light); font-weight: 600; }
+    pre .str { color: #86efac; }
+    pre .cm  { color: #4b7a5c; font-style: italic; }
+    pre .fn  { color: #6ee7b7; }
+    pre .num { color: #fde68a; }
+
+    /* ════════════════════════════════
+       FOOTER
+    ════════════════════════════════ */
+    footer {
+      border-top: 1px solid rgba(34,197,94,.08);
+      padding: 36px 56px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .footer-left { display: flex; align-items: center; gap: 16px; }
+    .footer-brand {
+      font-family: 'Syne', sans-serif; font-size: 1.15rem; font-weight: 800;
+      color: var(--text); text-decoration: none;
+    }
+    .footer-brand span { color: var(--green-light); }
+    .footer-copy { font-size: .83rem; color: var(--muted); }
+    footer a:not(.footer-brand) {
+      color: var(--green-light); text-decoration: none; font-size: .88rem;
+      transition: color .2s;
+    }
+    footer a:not(.footer-brand):hover { color: var(--green); }
+
+    /* ════════════════════════════════
+       ANIMATIONS
+    ════════════════════════════════ */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal {
+      opacity: 0; transform: translateY(32px);
+      transition: opacity .7s ease, transform .7s ease;
+    }
+    .reveal.in { opacity: 1; transform: translateY(0); }
+    .reveal-d1 { transition-delay: .05s; }
+    .reveal-d2 { transition-delay: .15s; }
+    .reveal-d3 { transition-delay: .25s; }
+
+    /* ════════════════════════════════
+       RESPONSIVE
+    ════════════════════════════════ */
+    @media (max-width: 900px) {
+      .topbar { padding: 14px 20px; }
+      .menu { display: none; }
+      .hero { padding: 100px 20px 60px; }
+      .stats { gap: 24px; }
+      .stats-divider { display: none; }
+      .features, .download, .code-section { padding: 64px 20px; }
+      .plans-wrapper { padding: 64px 20px; }
+      .cards, .plan-grid, .download-grid { grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: 16px; text-align: center; padding: 28px 20px; }
+      .footer-left { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── TOPBAR ── -->
+<header class="topbar" id="topbar">
+  <a class="brand" href="landing.html">
+    <div class="brand-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+      </svg>
+    </div>
+    Edu<span>Coin</span>
+  </a>
+  <nav class="menu">
+    <a href="#features">Imkoniyatlar</a>
+    <a href="#plans">Tariflar</a>
+    <a href="#download">Download</a>
+    <a href="#contact">Aloqa</a>
+  </nav>
+  <a class="btn btn-outline" href="index.html">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
+    </svg>
+    Login
+  </a>
+</header>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="hero-grid"></div>
+
+  <p class="badge">
+    <span class="badge-dot"></span>
+    Yangi avlod ta'lim platformasi
+  </p>
+
+  <h1>Ta'limni motivatsiya<br>bilan boshqaring</h1>
+
+  <p class="subtitle">
+    EduCoin o'quvchi, o'qituvchi va rahbariyatni bitta tizimda birlashtiradi —
+    coin, reyting, do'kon va hisobotlar bir joyda.
+  </p>
+
+  <div class="hero-actions">
+    <a class="btn btn-primary" href="index.html">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="5 3 19 12 5 21 5 3"/>
+      </svg>
+      Boshlash
+    </a>
+    <a class="btn btn-ghost" href="#features">
+      Demo ko'rish
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+      </svg>
+    </a>
+  </div>
+
+  <div class="stats">
+    <article>
+      <strong><span class="counter" data-target="12" data-suffix="k+">0</span></strong>
+      <span>Aktiv user</span>
+    </article>
+    <div class="stats-divider"></div>
+    <article>
+      <strong><span class="counter" data-target="98" data-suffix="%">0</span></strong>
+      <span>Mamnunlik</span>
+    </article>
+    <div class="stats-divider"></div>
+    <article>
+      <strong>24/7</strong>
+      <span>Monitoring</span>
+    </article>
+  </div>
+
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ── FEATURES ── -->
+<section id="features" class="features">
+  <div class="section-tag"><span class="section-tag-line"></span>Imkoniyatlar</div>
+  <h2 class="section-title">Asosiy imkoniyatlar</h2>
+  <div class="cards">
+
+    <article class="card reveal reveal-d1">
+      <div class="card-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 8v4l3 3"/>
+          <path d="M9.5 9.5C10.2 8.6 11 8 12 8c2.2 0 4 1.8 4 4s-1.8 4-4 4c-1.5 0-2.8-.8-3.5-2"/>
+        </svg>
+      </div>
+      <h3>Coin boshqaruvi</h3>
+      <p>O'qituvchilar coin beradi, o'quvchilar transfer qiladi, tizim avtomatik yuritadi. To'liq shaffof va real vaqt jarayoni.</p>
+    </article>
+
+    <article class="card reveal reveal-d2">
+      <div class="card-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="18 20 18 10"/><polyline points="12 20 12 4"/><polyline points="6 20 6 14"/>
+        </svg>
+      </div>
+      <h3>Reyting tizimi</h3>
+      <p>Real vaqt reyting jadvali bilan motivatsiyani barqaror oshiring. Kim birinchi — hammaga ko'rinadi.</p>
+    </article>
+
+    <article class="card reveal reveal-d3">
+      <div class="card-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+        </svg>
+      </div>
+      <h3>Hisobotlar</h3>
+      <p>Direktor va admin uchun analitika, kesimlar va tezkor ko'rsatkichlar. Ma'lumot — kuch.</p>
+    </article>
+
+    <article class="card reveal reveal-d1">
+      <div class="card-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <h3>Ko'p role tizimi</h3>
+      <p>Admin, direktor, o'qituvchi va o'quvchi — har biri o'z huquq va imkoniyatlariga ega bo'ladi.</p>
+    </article>
+
+    <article class="card reveal reveal-d2">
+      <div class="card-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+        </svg>
+      </div>
+      <h3>Virtual Do'kon</h3>
+      <p>O'quvchilar to'plagan coinlarni virtual do'konda sovg'a va imtiyozlarga almashtiradi.</p>
+    </article>
+
+    <article class="card reveal reveal-d3">
+      <div class="card-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/>
+          <path d="M2 20h20"/>
+        </svg>
+      </div>
+      <h3>Analitika paneli</h3>
+      <p>Har bir guruh, o'quvchi va sinf bo'yicha chuqur ko'rsatkichlar — grafiklar va jadvallar bilan.</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ── PLANS ── -->
+<section id="plans" class="plans-wrapper">
+  <div class="plans-inner">
+    <div class="section-tag"><span class="section-tag-line"></span>Narxlar</div>
+    <h2 class="section-title">Tariflar</h2>
+    <div class="plan-grid">
+
+      <article class="plan reveal reveal-d1">
+        <div class="plan-header">
+          <div class="plan-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <h3>Starter</h3>
+        </div>
+        <p class="price">0 <small style="font-size:.85rem;color:var(--muted);font-weight:400">so'm/oy</small></p>
+        <p class="price-note">Kichik maktablar uchun</p>
+        <div class="plan-divider"></div>
+        <ul>
+          <li>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            1 ta filial
+          </li>
+          <li>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Asosiy dashboard
+          </li>
+          <li>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Login tizimi
+          </li>
+        </ul>
+      </article>
+
+      <article class="plan featured reveal reveal-d2">
+        <div class="plan-header">
+          <div class="plan-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          </div>
+          <h3>Pro</h3>
+        </div>
+        <p class="price">299 000 <small style="font-size:.85rem;font-weight:400">so'm/oy</small></p>
+        <p class="price-note" style="color:var(--green)">Eng mashhur tarif</p>
+        <div class="plan-divider"></div>
+        <ul>
+          <li>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Ko'p role tizimi
+          </li>
+          <li>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Reyting + Shop
+          </li>
+          <li>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Hisobotlar moduli
+          </li>
+          <li>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            API integratsiya
+          </li>
+        </ul>
+      </article>
+
+      <article class="plan reveal reveal-d3">
+        <div class="plan-header">
+          <div class="plan-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+          </div>
+          <h3>Enterprise</h3>
+        </div>
+        <p class="price">Custom</p>
+        <p class="price-note">Yirik ta'lim tarmoqlari uchun</p>
+        <div class="plan-divider"></div>
+        <ul>
+          <li>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Cheksiz filial
+          </li>
+          <li>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Maxsus integratsiya
+          </li>
+          <li>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Prioritet support
+          </li>
+        </ul>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── DOWNLOAD ── -->
+<section id="download" class="download">
+  <div class="section-tag"><span class="section-tag-line"></span>Yuklab olish</div>
+  <h2 class="section-title">Ilovani yuklab olish</h2>
+  <p class="download-subtitle">
+    Noutbuk uchun <code>.exe</code>, telefon uchun Flutter <code>.apk</code> fayllarini shu bo'limdan yuklab olasiz.
+  </p>
+  <div class="download-grid">
+
+    <article class="download-card reveal reveal-d1">
+      <div class="download-card-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+          <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+        </svg>
+      </div>
+      <h3>Windows (.exe)</h3>
+      <p>Noutbuk/PC uchun o'rnatiladigan Windows ilova fayli. Bir marta o'rnating, istalgan vaqt foydalaning.</p>
+      <div class="status-badge"><span class="status-dot"></span>Tayyor emas</div>
+      <a class="btn btn-primary" href="downloads/EduCoin-Setup.exe" download>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        EXE yuklab olish
+      </a>
+    </article>
+
+    <article class="download-card reveal reveal-d2">
+      <div class="download-card-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+          <line x1="12" y1="18" x2="12.01" y2="18"/>
+        </svg>
+      </div>
+      <h3>Flutter Android (.apk)</h3>
+      <p>Telefon yoki planshetga Flutter build qilingan APK fayli. Yuqori tezlik va zamonaviy UI.</p>
+      <div class="status-badge"><span class="status-dot"></span>Tayyor emas</div>
+      <a class="btn btn-ghost" href="downloads/EduCoin-Mobile.apk" download>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        APK yuklab olish
+      </a>
+    </article>
+
+    <article class="download-card reveal reveal-d3">
+      <div class="download-card-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+      </div>
+      <h3>Build yo'riqnomasi</h3>
+      <p>Agar fayllar hali tayyor bo'lmasa, bir buyruq bilan build qilib chiqarib oling. Batafsil ko'rsatmalar.</p>
+      <a class="btn btn-ghost" href="DOWNLOADS.md">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+          <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+        </svg>
+        Qo'llanmani ochish
+      </a>
+    </article>
+
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer id="contact">
+  <div class="footer-left">
+    <a class="footer-brand" href="landing.html">Edu<span>Coin</span></a>
+    <span class="footer-copy">© 2026. Barcha huquqlar himoyalangan.</span>
+  </div>
+  <a href="index.html">
+    Platformaga kirish
+    <svg style="display:inline;margin-left:4px;vertical-align:middle" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+    </svg>
+  </a>
+</footer>
+
+<script>
+  /* ── Topbar scroll shrink ── */
+  window.addEventListener('scroll', () => {
+    document.getElementById('topbar').classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  /* ── Reveal on scroll ── */
+  const reveals = document.querySelectorAll('.reveal');
+  const revealObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => revealObs.observe(el));
+
+  /* ── Counter animation ── */
+  function animateCounter(el) {
+    const target = parseInt(el.dataset.target);
+    const suffix = el.dataset.suffix || '';
+    let start = 0;
+    const duration = 1600;
+    const startTime = performance.now();
+    function tick(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.floor(eased * target);
+      el.textContent = current + suffix;
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+  const counters = document.querySelectorAll('.counter');
+  const counterObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { animateCounter(e.target); counterObs.unobserve(e.target); }
+    });
+  }, { threshold: .5 });
+  counters.forEach(el => counterObs.observe(el));
+
+  /* ── Copy code ── */
+  function copyCode() {
+    const raw = `# EduCoin platformasini o'rnatish
+git clone https://github.com/yourorg/educoin.git
+cd educoin
+
+# Dependensiyalarni o'rnatish
+npm install
+
+# .env faylini sozlash
+cp .env.example .env
+
+# Serverni ishga tushirish
+npm run dev
+
+# ✓ Platforma http://localhost:3000 da ishga tushdi`;
+
+    navigator.clipboard.writeText(raw).then(() => {
+      const btn = document.getElementById('copyBtn');
+      const txt = document.getElementById('copyText');
+      btn.classList.add('copied');
+      txt.textContent = 'Nusxa olindi!';
+      btn.querySelector('svg').innerHTML = '<polyline points="20 6 9 17 4 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>';
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        txt.textContent = 'Nusxa olish';
+        btn.querySelector('svg').innerHTML = '<rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke="currentColor" stroke-width="2" fill="none"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="2" fill="none"/>';
+      }, 2500);
+    });
+  }
+</script>
+
+</body>
+</html>

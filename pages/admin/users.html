@@ -3,165 +3,1282 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="EduCoin — ta'lim mukofot tizimi">
+  <meta name="description" content="EduCoin ta'lim mukofot tizimi foydalanuvchilar boshqaruvi">
   <meta name="theme-color" content="#050A05">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <title>EduCoin — Foydalanuvchilar</title>
+  <title>EduCoin - Foydalanuvchilar</title>
   <link rel="stylesheet" href="../../css/style.css">
   <link rel="stylesheet" href="../../css/dashboard.css">
+  <style>
+    .topbar-subtitle {
+      margin-top: 2px;
+      font-size: 12px;
+      color: var(--text3);
+    }
+
+    .users-hero {
+      position: relative;
+      overflow: hidden;
+      padding: 28px;
+      border: 1px solid rgba(0, 255, 136, 0.12);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(135deg, rgba(0, 255, 136, 0.08), rgba(255, 215, 0, 0.05)),
+        var(--card);
+      margin-bottom: 24px;
+    }
+
+    .users-hero::after {
+      content: "";
+      position: absolute;
+      top: -60px;
+      right: -40px;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 215, 0, 0.14), transparent 70%);
+      pointer-events: none;
+    }
+
+    .users-hero p {
+      max-width: 780px;
+      color: var(--text2);
+    }
+
+    .users-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .users-stat-card .stat-icon {
+      background: rgba(0, 255, 136, 0.08);
+      color: var(--primary);
+      border: 1px solid rgba(0, 255, 136, 0.12);
+    }
+
+    .users-stat-card .stat-icon svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .users-stat-card .stat-icon.warning {
+      color: var(--warning);
+      background: rgba(255, 179, 71, 0.12);
+      border-color: rgba(255, 179, 71, 0.2);
+    }
+
+    .users-stat-card .stat-icon.danger {
+      color: var(--danger);
+      background: rgba(255, 68, 68, 0.12);
+      border-color: rgba(255, 68, 68, 0.2);
+    }
+
+    .users-stat-card .stat-icon.info {
+      color: var(--info);
+      background: rgba(0, 229, 204, 0.12);
+      border-color: rgba(0, 229, 204, 0.2);
+    }
+
+    .users-controls-card {
+      margin-bottom: 24px;
+    }
+
+    .users-controls-row {
+      margin-bottom: 14px;
+      align-items: stretch;
+    }
+
+    .users-controls-row .search-bar {
+      min-width: 260px;
+    }
+
+    .users-controls-row .form-control {
+      min-width: 170px;
+    }
+
+    .users-filters-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .users-filter-hint {
+      font-size: 13px;
+      color: var(--text2);
+    }
+
+    .users-overview-grid {
+      margin-bottom: 24px;
+    }
+
+    .users-section-desc {
+      margin-top: 4px;
+      font-size: 13px;
+      color: var(--text3);
+    }
+
+    .role-summary-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .role-summary-row {
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--bg3);
+    }
+
+    .role-summary-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .role-summary-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .role-summary-values {
+      font-size: 13px;
+      color: var(--text2);
+      white-space: nowrap;
+    }
+
+    .role-summary-values strong {
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+    }
+
+    .role-progress {
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+      overflow: hidden;
+    }
+
+    .role-progress > span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--primary), var(--primary-light));
+      box-shadow: 0 0 14px rgba(0, 255, 136, 0.25);
+    }
+
+    .recent-users-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .recent-user-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--bg3);
+    }
+
+    .recent-user-main {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .recent-user-details {
+      min-width: 0;
+    }
+
+    .recent-user-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .recent-user-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: var(--text3);
+    }
+
+    .recent-user-side {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .users-muted {
+      font-size: 12px;
+      color: var(--text3);
+    }
+
+    .users-table-card {
+      overflow: hidden;
+    }
+
+    .user-row-name {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .user-secondary-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: var(--text3);
+    }
+
+    .username-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .status-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .users-inline-note {
+      font-size: 11px;
+      color: var(--text3);
+    }
+
+    .users-action-buttons .btn {
+      min-width: 38px;
+      justify-content: center;
+      padding-inline: 10px;
+    }
+
+    .users-action-buttons svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .users-empty {
+      padding: 48px 12px;
+    }
+
+    .users-empty .icon {
+      margin-bottom: 14px;
+    }
+
+    .users-modal {
+      max-width: 640px;
+    }
+
+    .users-modal-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .users-modal-grid .full-span {
+      grid-column: 1 / -1;
+    }
+
+    .field-help {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--text3);
+    }
+
+    .coin-display svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .users-overview-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .users-hero {
+        padding: 22px;
+      }
+
+      .users-modal-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .recent-user-card {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .recent-user-side {
+        width: 100%;
+        align-items: flex-start;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="app-layout">
     <div id="sidebar-container"></div>
     <div class="main-content">
       <header class="topbar">
-        <div style="display:flex;align-items:center;gap:12px">
-          <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
-          <div class="topbar-title">👥 Foydalanuvchilar</div>
-        </div>
-        <div class="topbar-right"><span class="badge badge-danger">ADMIN</span></div>
-      </header>
-      <div class="page-content">
-        <div class="page-header">
-          <div><h1>👥 Barcha foydalanuvchilar</h1><p>Tizimda ro'yxatdan o'tgan barcha userlar</p></div>
-          <button class="btn btn-primary" onclick="openModal('addUserModal')">➕ Yangi user</button>
-        </div>
-
-        <div class="search-filter-row">
-          <div class="search-bar">
-            <span>🔍</span>
-            <input type="text" id="searchInput" placeholder="Ism yoki username..." oninput="filterUsers()">
+        <div class="topbar-left">
+          <button class="hamburger" id="sidebarToggle" aria-label="Menyuni ochish">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <div>
+            <div class="topbar-title">Foydalanuvchilar</div>
+            <div class="topbar-subtitle" id="topbarSubtitle">Tizim foydalanuvchilari yuklanmoqda</div>
           </div>
-          <select class="form-control role-filter" id="roleFilter" onchange="filterUsers()">
-            <option value="">Barcha rollar</option>
-            <option value="student">O'quvchi</option>
-            <option value="teacher">O'qituvchi</option>
-            <option value="manager">Menejer</option>
-            <option value="director">Direktor</option>
-            <option value="admin">Admin</option>
-          </select>
         </div>
+        <div class="topbar-right">
+          <div class="coin-display" id="topCoinDisplay">0 coin</div>
+          <span class="badge badge-danger">ADMIN</span>
+        </div>
+      </header>
 
-        <div class="table-wrap">
-          <table id="usersTable">
-            <thead><tr><th>#</th><th>Ism</th><th>Username</th><th>Rol</th><th>Balans</th><th>Holat</th><th>Amallar</th></tr></thead>
-            <tbody id="usersBody"></tbody>
-          </table>
-        </div>
+      <div class="page-content">
+        <section class="page-header users-hero">
+          <div>
+            <h1>Foydalanuvchilar boshqaruvi</h1>
+            <p>Qidirish, saralash, bloklash, tahrirlash va yangi account yaratish uchun yagona admin panel.</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-secondary" id="resetFiltersBtn" type="button">
+              <span class="btn-icon" data-icon-name="refresh"></span>
+              <span>Filterlarni tozalash</span>
+            </button>
+            <button class="btn btn-primary" id="openAddUserBtn" type="button">
+              <span class="btn-icon" data-icon-name="addUser"></span>
+              <span>Yangi foydalanuvchi</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="users-stats-grid">
+          <div class="stat-card users-stat-card">
+            <div class="stat-icon" data-icon-name="users"></div>
+            <div class="stat-info">
+              <div class="label">Jami foydalanuvchi</div>
+              <div class="value" id="statTotalUsers">0</div>
+              <div class="change" id="statTotalUsersHint">0 ta natija</div>
+            </div>
+          </div>
+          <div class="stat-card users-stat-card">
+            <div class="stat-icon info" data-icon-name="activeUsers"></div>
+            <div class="stat-info">
+              <div class="label">Faol accountlar</div>
+              <div class="value" id="statActiveUsers">0</div>
+              <div class="change" id="statActiveUsersHint">0 ta filtrda faol</div>
+            </div>
+          </div>
+          <div class="stat-card users-stat-card">
+            <div class="stat-icon danger" data-icon-name="blockedUsers"></div>
+            <div class="stat-info">
+              <div class="label">Bloklanganlar</div>
+              <div class="value" id="statBlockedUsers">0</div>
+              <div class="change" id="statBlockedUsersHint">0 ta filtrda bloklangan</div>
+            </div>
+          </div>
+          <div class="stat-card users-stat-card">
+            <div class="stat-icon warning" data-icon-name="calendar"></div>
+            <div class="stat-info">
+              <div class="label">Bugun qo'shilgan</div>
+              <div class="value" id="statTodayUsers">0</div>
+              <div class="change" id="statTodayUsersHint">Bugungi yangi accountlar</div>
+            </div>
+          </div>
+          <div class="stat-card users-stat-card">
+            <div class="stat-icon" data-icon-name="coin"></div>
+            <div class="stat-info">
+              <div class="label">Jami coin</div>
+              <div class="value" id="statTotalCoins">0</div>
+              <div class="change" id="statTotalCoinsHint">O'rtacha 0 coin</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card users-controls-card">
+          <div class="search-filter-row users-controls-row">
+            <div class="search-bar">
+              <span data-icon-name="search"></span>
+              <input type="text" id="searchInput" placeholder="Ism, username, email yoki ID bo'yicha qidiring..." autocomplete="off">
+            </div>
+            <select class="form-control" id="roleFilter">
+              <option value="">Barcha rollar</option>
+              <option value="student">O'quvchi</option>
+              <option value="teacher">O'qituvchi</option>
+              <option value="manager">Menejer</option>
+              <option value="director">Direktor</option>
+              <option value="admin">Admin</option>
+            </select>
+            <select class="form-control" id="statusFilter">
+              <option value="">Barcha holatlar</option>
+              <option value="active">Faol</option>
+              <option value="blocked">Bloklangan</option>
+            </select>
+            <select class="form-control" id="sortFilter">
+              <option value="newest">Eng yangi</option>
+              <option value="oldest">Eng eski</option>
+              <option value="name-asc">Ism bo'yicha A-Z</option>
+              <option value="coins-desc">Balans bo'yicha ko'pdan</option>
+              <option value="coins-asc">Balans bo'yicha kamdan</option>
+            </select>
+          </div>
+          <div class="users-filters-footer">
+            <div class="users-filter-hint" id="filterHint">Barcha foydalanuvchilar ko'rsatilmoqda</div>
+            <div class="badge badge-primary" id="resultBadge">0 / 0 ta</div>
+          </div>
+        </section>
+
+        <section class="grid grid-2 users-overview-grid">
+          <div class="card">
+            <div class="card-toolbar">
+              <div>
+                <div class="card-title">Rol bo'yicha taqsimot</div>
+                <div class="users-section-desc">Joriy filtr natijasiga asoslangan ko'rinish</div>
+              </div>
+              <span class="badge badge-info" id="roleSummaryBadge">0 ta rol</span>
+            </div>
+            <div id="roleSummary" class="role-summary-list"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-toolbar">
+              <div>
+                <div class="card-title">Yaqinda qo'shilganlar</div>
+                <div class="users-section-desc">Oxirgi yaratilgan foydalanuvchilar</div>
+              </div>
+            </div>
+            <div id="recentUsers" class="recent-users-list"></div>
+          </div>
+        </section>
+
+        <section class="card users-table-card">
+          <div class="card-toolbar">
+            <div>
+              <div class="card-title">Barcha foydalanuvchilar</div>
+              <div class="users-section-desc">Admin uchun to'liq boshqaruv jadvali</div>
+            </div>
+            <span class="badge badge-primary" id="tableCount">0 ta foydalanuvchi</span>
+          </div>
+
+          <div class="table-wrap">
+            <table id="usersTable">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Foydalanuvchi</th>
+                  <th>Username</th>
+                  <th>Rol</th>
+                  <th>Balans</th>
+                  <th>Holat</th>
+                  <th>Qo'shilgan</th>
+                  <th>Amallar</th>
+                </tr>
+              </thead>
+              <tbody id="usersBody"></tbody>
+            </table>
+          </div>
+        </section>
       </div>
     </div>
   </div>
 
-  <!-- Add User Modal -->
-  <div class="modal-overlay" id="addUserModal">
-    <div class="modal">
-      <div class="modal-header"><div class="modal-title">➕ Yangi foydalanuvchi</div><button class="modal-close" onclick="closeModal('addUserModal')">×</button></div>
+  <div class="modal-overlay" id="userModal">
+    <div class="modal users-modal">
+      <div class="modal-header">
+        <div class="modal-title" id="userModalTitle">Yangi foydalanuvchi</div>
+        <button class="modal-close" id="closeUserModalBtn" type="button" aria-label="Yopish">x</button>
+      </div>
       <div class="modal-body">
-        <div id="addAlert"></div>
-        <div class="form-group"><label class="form-label">To'liq ism</label><input type="text" class="form-control" id="newName" placeholder="Jasur Nazarov"></div>
-        <div class="form-group"><label class="form-label">Username</label><input type="text" class="form-control" id="newUsername" placeholder="jasur01"></div>
-        <div class="form-group"><label class="form-label">Parol</label><input type="text" class="form-control" id="newPassword" placeholder="Parol"></div>
-        <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-control" id="newEmail" placeholder="email@example.com"></div>
-        <div class="form-group"><label class="form-label">Rol</label>
-          <select class="form-control" id="newRole">
-            <option value="student">O'quvchi</option>
-            <option value="teacher">O'qituvchi</option>
-            <option value="manager">Menejer</option>
-            <option value="director">Direktor</option>
-            <option value="admin">Admin</option>
-          </select>
-        </div>
+        <div id="userModalAlert"></div>
+        <form id="userForm">
+          <div class="users-modal-grid">
+            <div class="form-group">
+              <label class="form-label" for="userName">To'liq ism</label>
+              <input type="text" class="form-control" id="userName" placeholder="Masalan: Jasur Nazarov" autocomplete="name">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="userUsername">Username</label>
+              <input type="text" class="form-control" id="userUsername" placeholder="Masalan: jasur01" autocomplete="off">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="userEmail">Email</label>
+              <input type="email" class="form-control" id="userEmail" placeholder="email@example.com" autocomplete="email">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="userPassword">Parol</label>
+              <input type="text" class="form-control" id="userPassword" placeholder="Kamida 6 ta belgi" autocomplete="new-password">
+              <div class="field-help" id="passwordHelp">Yangi account uchun parol majburiy.</div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="userRole">Rol</label>
+              <select class="form-control" id="userRole"></select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="userCoins" id="coinsLabel">Boshlang'ich balans</label>
+              <input type="number" class="form-control" id="userCoins" min="0" step="1" placeholder="0">
+            </div>
+
+            <div class="form-group full-span">
+              <label class="form-label" for="userStatus">Holat</label>
+              <select class="form-control" id="userStatus">
+                <option value="active">Faol</option>
+                <option value="blocked">Bloklangan</option>
+              </select>
+              <div class="field-help">Admin account bloklanmaydi va boshqa rolga o'tkazilmaydi.</div>
+            </div>
+          </div>
+        </form>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('addUserModal')">Bekor</button>
-        <button class="btn btn-primary" onclick="addUser()">➕ Qo'shish</button>
+        <button class="btn btn-secondary" id="cancelUserModalBtn" type="button">Bekor</button>
+        <button class="btn btn-primary" id="submitUserFormBtn" type="submit" form="userForm">Saqlash</button>
       </div>
     </div>
   </div>
 
-  <script src="../../js/auth.js"></script>
-  <script src="../../js/main.js"></script>
+  <script src="../../js/auth.js?v=20260413k"></script>
+  <script src="../../js/main.js?v=20260413k"></script>
   <script>
+    const roleLabels = {
+      student: "O'quvchi",
+      teacher: "O'qituvchi",
+      manager: 'Menejer',
+      director: 'Direktor',
+      admin: 'Admin',
+    };
+
+    const roleOrder = ['student', 'teacher', 'manager', 'director', 'admin'];
+
+    let currentUser = null;
     let allUsers = [];
-    const roleLabels={student:"O'quvchi",teacher:"O'qituvchi",manager:"Menejer",director:"Direktor",admin:"Admin"};
-    const roleColors={student:'#4CAF50',teacher:'#2196F3',manager:'#FF9800',director:'#9C27B0',admin:'#F44336'};
+    let filteredUsers = [];
+    let modalMode = 'add';
+    let editingUserId = null;
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      await EduCoin.init();
-      const user = EduCoin.requireAuth(['admin']);
-      if (!user) return;
-      document.getElementById('sidebar-container').innerHTML = buildSidebar('admin', user);
-      allUsers = EduCoin.getUsers();
-      renderUsers(allUsers);
-    });
-
-    function filterUsers() {
-      const q = document.getElementById('searchInput').value.toLowerCase();
-      const role = document.getElementById('roleFilter').value;
-      let filtered = allUsers;
-      if (q) filtered = filtered.filter(u=>u.name.toLowerCase().includes(q)||u.username.toLowerCase().includes(q));
-      if (role) filtered = filtered.filter(u=>u.role===role);
-      renderUsers(filtered);
+    function createSvgIcon(paths, className = '') {
+      const cls = className ? ` class="${className}"` : '';
+      return `<svg${cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
     }
 
-    function renderUsers(users) {
-      document.getElementById('usersBody').innerHTML = users.map((u,i) => `<tr>
-        <td class="table-index">${i+1}</td>
-        <td><div class="user-avatar-cell">
-          <div class="user-avatar">${getInitials(u.name)}</div>
-          <div class="user-info"><div class="user-name">${u.name}</div><div class="user-email">${u.email||'—'}</div></div>
-        </div></td>
-        <td class="username-cell">${u.username}</td>
-        <td><span class="badge role-badge" data-role="${u.role}">${roleLabels[u.role]}</span></td>
-        <td class="coins-cell">${(u.coins||0).toLocaleString()} 🪙</td>
-        <td><span class="badge ${u.active ? 'badge-success' : 'badge-danger'}">${u.active ? 'Faol' : 'Bloklangan'}</span></td>
-        <td>
-          <div class="action-buttons">
-            <button class="btn btn-warning btn-sm" onclick="toggleUser('${u.id}')">${u.active ? '🔒' : '🔓'}</button>
-            <button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}')">🗑️</button>
+    function icon(name, className = '') {
+      switch (name) {
+        case 'search':
+          return createSvgIcon('<circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.65" y2="16.65"></line>', className);
+        case 'refresh':
+          return createSvgIcon('<polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.13-3.36L23 10"></path><path d="M20.49 15a9 9 0 0 1-14.13 3.36L1 14"></path>', className);
+        case 'edit':
+          return createSvgIcon('<path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 1 1 3 3L7 19l-4 1 1-4Z"></path>', className);
+        case 'lock':
+          return createSvgIcon('<rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>', className);
+        case 'unlock':
+          return createSvgIcon('<rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path>', className);
+        case 'trash':
+          return createSvgIcon('<polyline points="3 6 5 6 21 6"></polyline><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"></path><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line>', className);
+        case 'calendar':
+          return createSvgIcon('<rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>', className);
+        case 'activeUsers':
+          return createSvgIcon('<path d="M20 6 9 17l-5-5"></path>', className);
+        case 'blockedUsers':
+          return createSvgIcon('<circle cx="12" cy="12" r="9"></circle><line x1="5" y1="19" x2="19" y2="5"></line>', className);
+        default:
+          return typeof getUiIcon === 'function'
+            ? getUiIcon(name, className)
+            : createSvgIcon('<circle cx="12" cy="12" r="10"></circle>', className);
+      }
+    }
+
+    function hydrateStaticIcons() {
+      document.querySelectorAll('[data-icon-name]').forEach((node) => {
+        node.innerHTML = icon(node.dataset.iconName);
+      });
+    }
+
+    function escapeHtml(value) {
+      return String(value || '').replace(/[&<>"']/g, (char) => (
+        {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;',
+        }[char]
+      ));
+    }
+
+    function normalizeText(value) {
+      return String(value || '').trim().normalize('NFKC').toLowerCase();
+    }
+
+    function formatUserDate(value) {
+      if (!value) {
+        return 'Sana yo\'q';
+      }
+      const parsed = new Date(value);
+      if (Number.isNaN(parsed.getTime())) {
+        return 'Sana yo\'q';
+      }
+      return EduCoin.formatDate(value);
+    }
+
+    function getTodayAddedCount(users) {
+      const today = new Date().toISOString().slice(0, 10);
+      return users.filter((user) => String(user.createdAt || '').slice(0, 10) === today).length;
+    }
+
+    function setStatValue(baseId, value, hint) {
+      const valueNode = document.getElementById(baseId);
+      const hintNode = document.getElementById(`${baseId}Hint`);
+      if (valueNode) {
+        valueNode.textContent = value;
+      }
+      if (hintNode) {
+        hintNode.textContent = hint;
+      }
+    }
+
+    function populateRoleOptions(selectedRole = 'student') {
+      const roleSelect = document.getElementById('userRole');
+      if (!roleSelect) {
+        return;
+      }
+      roleSelect.innerHTML = roleOrder
+        .map((role) => `<option value="${role}" ${role === selectedRole ? 'selected' : ''}>${roleLabels[role]}</option>`)
+        .join('');
+    }
+
+    function renderTopCoinDisplay() {
+      const coinDisplay = document.getElementById('topCoinDisplay');
+      if (!coinDisplay || !currentUser) {
+        return;
+      }
+      coinDisplay.innerHTML = `${icon('coin')}<span>${escapeHtml(EduCoin.formatCoins(currentUser.coins || 0))}</span>`;
+    }
+
+    function getCurrentFilters() {
+      return {
+        queryRaw: document.getElementById('searchInput')?.value || '',
+        query: normalizeText(document.getElementById('searchInput')?.value || ''),
+        role: document.getElementById('roleFilter')?.value || '',
+        status: document.getElementById('statusFilter')?.value || '',
+        sort: document.getElementById('sortFilter')?.value || 'newest',
+      };
+    }
+
+    function getFilteredUsers() {
+      const filters = getCurrentFilters();
+      let users = [...allUsers];
+
+      if (filters.query) {
+        users = users.filter((user) => (
+          normalizeText(user.name).includes(filters.query) ||
+          normalizeText(user.fullName).includes(filters.query) ||
+          normalizeText(user.username).includes(filters.query) ||
+          normalizeText(user.email).includes(filters.query) ||
+          normalizeText(user.id).includes(filters.query)
+        ));
+      }
+
+      if (filters.role) {
+        users = users.filter((user) => user.role === filters.role);
+      }
+
+      if (filters.status === 'active') {
+        users = users.filter((user) => user.active);
+      }
+
+      if (filters.status === 'blocked') {
+        users = users.filter((user) => !user.active);
+      }
+
+      users.sort((left, right) => {
+        switch (filters.sort) {
+          case 'oldest':
+            return new Date(left.createdAt || 0) - new Date(right.createdAt || 0);
+          case 'name-asc':
+            return String(left.name || '').localeCompare(String(right.name || ''), 'uz-Latn-UZ');
+          case 'coins-desc':
+            return Number(right.coins || 0) - Number(left.coins || 0);
+          case 'coins-asc':
+            return Number(left.coins || 0) - Number(right.coins || 0);
+          case 'newest':
+          default:
+            return new Date(right.createdAt || 0) - new Date(left.createdAt || 0);
+        }
+      });
+
+      return users;
+    }
+
+    function renderStats() {
+      const totalUsers = allUsers.length;
+      const activeUsers = allUsers.filter((user) => user.active).length;
+      const blockedUsers = totalUsers - activeUsers;
+      const filteredActiveUsers = filteredUsers.filter((user) => user.active).length;
+      const filteredBlockedUsers = filteredUsers.length - filteredActiveUsers;
+      const totalCoins = allUsers.reduce((sum, user) => sum + Number(user.coins || 0), 0);
+      const averageCoins = totalUsers ? Math.round(totalCoins / totalUsers) : 0;
+      const todayUsers = getTodayAddedCount(allUsers);
+
+      setStatValue('statTotalUsers', totalUsers.toLocaleString(), `${filteredUsers.length.toLocaleString()} ta natija ko'rinmoqda`);
+      setStatValue('statActiveUsers', activeUsers.toLocaleString(), `${filteredActiveUsers.toLocaleString()} ta filtrda faol`);
+      setStatValue('statBlockedUsers', blockedUsers.toLocaleString(), `${filteredBlockedUsers.toLocaleString()} ta filtrda bloklangan`);
+      setStatValue('statTodayUsers', todayUsers.toLocaleString(), 'Bugun yaratilgan accountlar');
+      setStatValue('statTotalCoins', totalCoins.toLocaleString(), `O'rtacha ${averageCoins.toLocaleString()} coin`);
+
+      const topbarSubtitle = document.getElementById('topbarSubtitle');
+      if (topbarSubtitle) {
+        topbarSubtitle.textContent = `${totalUsers} ta foydalanuvchi, ${activeUsers} ta faol account`;
+      }
+    }
+
+    function renderFilterMeta() {
+      const filters = getCurrentFilters();
+      const parts = [];
+
+      if (filters.queryRaw.trim()) {
+        parts.push(`Qidiruv: "${filters.queryRaw.trim()}"`);
+      }
+      if (filters.role) {
+        parts.push(`Rol: ${roleLabels[filters.role]}`);
+      }
+      if (filters.status) {
+        parts.push(`Holat: ${filters.status === 'active' ? 'Faol' : 'Bloklangan'}`);
+      }
+
+      const filterHint = document.getElementById('filterHint');
+      const resultBadge = document.getElementById('resultBadge');
+      const tableCount = document.getElementById('tableCount');
+
+      if (filterHint) {
+        filterHint.textContent = parts.length
+          ? `${parts.join(' | ')} | Saralash: ${getSortLabel(filters.sort)}`
+          : `Barcha foydalanuvchilar ko'rsatilmoqda | Saralash: ${getSortLabel(filters.sort)}`;
+      }
+
+      if (resultBadge) {
+        resultBadge.textContent = `${filteredUsers.length} / ${allUsers.length} ta`;
+      }
+
+      if (tableCount) {
+        tableCount.textContent = `${filteredUsers.length} ta foydalanuvchi`;
+      }
+    }
+
+    function getSortLabel(sort) {
+      return {
+        newest: 'Eng yangi',
+        oldest: 'Eng eski',
+        'name-asc': 'Ism bo\'yicha A-Z',
+        'coins-desc': 'Balans bo\'yicha ko\'pdan',
+        'coins-asc': 'Balans bo\'yicha kamdan',
+      }[sort] || 'Eng yangi';
+    }
+
+    function renderRoleSummary() {
+      const host = document.getElementById('roleSummary');
+      const badge = document.getElementById('roleSummaryBadge');
+
+      if (!host) {
+        return;
+      }
+
+      if (!filteredUsers.length) {
+        host.innerHTML = `
+          <div class="empty-state users-empty">
+            <div class="icon">${icon('users')}</div>
+            <p>Joriy filter bo'yicha foydalanuvchi topilmadi.</p>
           </div>
-        </td>
-      </tr>`).join('');
+        `;
+        if (badge) {
+          badge.textContent = '0 ta rol';
+        }
+        return;
+      }
+
+      const total = filteredUsers.length;
+      const rolesWithResults = roleOrder.filter((role) => filteredUsers.some((user) => user.role === role)).length;
+
+      if (badge) {
+        badge.textContent = `${rolesWithResults} ta rol`;
+      }
+
+      host.innerHTML = roleOrder
+        .map((role) => {
+          const count = filteredUsers.filter((user) => user.role === role).length;
+          const percent = total ? Math.round((count / total) * 100) : 0;
+          return `
+            <div class="role-summary-row">
+              <div class="role-summary-head">
+                <div class="role-summary-meta">
+                  <span class="badge role-badge" data-role="${role}">${roleLabels[role]}</span>
+                  <span class="users-muted">${percent}%</span>
+                </div>
+                <div class="role-summary-values">
+                  <strong>${count}</strong>
+                  <span> ta</span>
+                </div>
+              </div>
+              <div class="role-progress">
+                <span style="width:${percent}%"></span>
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+    }
+
+    function renderRecentUsers() {
+      const host = document.getElementById('recentUsers');
+      if (!host) {
+        return;
+      }
+
+      const recentUsers = [...allUsers]
+        .sort((left, right) => new Date(right.createdAt || 0) - new Date(left.createdAt || 0))
+        .slice(0, 5);
+
+      if (!recentUsers.length) {
+        host.innerHTML = `
+          <div class="empty-state users-empty">
+            <div class="icon">${icon('users')}</div>
+            <p>Hali foydalanuvchilar yo'q.</p>
+          </div>
+        `;
+        return;
+      }
+
+      host.innerHTML = recentUsers
+        .map((user) => `
+          <div class="recent-user-card">
+            <div class="recent-user-main">
+              <div class="user-avatar">${escapeHtml(getInitials(user.name))}</div>
+              <div class="recent-user-details">
+                <div class="recent-user-name">${escapeHtml(user.name)}</div>
+                <div class="recent-user-meta">
+                  <span class="badge role-badge" data-role="${user.role}">${roleLabels[user.role]}</span>
+                  <span>${escapeHtml(user.username)}</span>
+                  <span>${user.active ? 'Faol' : 'Bloklangan'}</span>
+                </div>
+                <div class="recent-user-meta">
+                  <span>${escapeHtml(user.email || 'Email kiritilmagan')}</span>
+                </div>
+              </div>
+            </div>
+            <div class="recent-user-side">
+              <div class="users-muted">${escapeHtml(formatUserDate(user.createdAt))}</div>
+              <button class="btn btn-secondary btn-sm" type="button" data-open-edit="${user.id}">Tahrirlash</button>
+            </div>
+          </div>
+        `)
+        .join('');
+    }
+
+    function renderUsersTable() {
+      const body = document.getElementById('usersBody');
+      if (!body) {
+        return;
+      }
+
+      if (!filteredUsers.length) {
+        body.innerHTML = `
+          <tr>
+            <td colspan="8">
+              <div class="empty-state users-empty">
+                <div class="icon">${icon('users')}</div>
+                <p>Bu filter bo'yicha foydalanuvchi topilmadi. Filterlarni tozalab qayta urinib ko'ring.</p>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      body.innerHTML = filteredUsers
+        .map((user, index) => `
+          <tr>
+            <td class="table-index">${index + 1}</td>
+            <td>
+              <div class="user-avatar-cell">
+                <div class="user-avatar">${escapeHtml(getInitials(user.name))}</div>
+                <div class="user-row-name">
+                  <div class="user-name">${escapeHtml(user.name)}</div>
+                  <div class="user-secondary-line">
+                    <span>${escapeHtml(user.email || 'Email yo\'q')}</span>
+                    <span>ID: ${escapeHtml(user.id)}</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="username-stack">
+                <span class="code-pill">${escapeHtml(user.username)}</span>
+                <span class="users-muted">${escapeHtml(user.fullName || user.name)}</span>
+              </div>
+            </td>
+            <td><span class="badge role-badge" data-role="${user.role}">${roleLabels[user.role]}</span></td>
+            <td class="coins-cell">${Number(user.coins || 0).toLocaleString()} coin</td>
+            <td>
+              <div class="status-stack">
+                <span class="badge ${user.active ? 'badge-success' : 'badge-danger'}">${user.active ? 'Faol' : 'Bloklangan'}</span>
+                ${user.role === 'admin' ? '<span class="users-inline-note">Himoyalangan account</span>' : ''}
+              </div>
+            </td>
+            <td class="users-muted">${escapeHtml(formatUserDate(user.createdAt))}</td>
+            <td>
+              <div class="action-buttons users-action-buttons">
+                <button class="btn btn-secondary btn-sm" type="button" data-action="edit" data-id="${user.id}" title="Tahrirlash" aria-label="Tahrirlash">
+                  ${icon('edit')}
+                </button>
+                <button class="btn ${user.active ? 'btn-warning' : 'btn-success'} btn-sm" type="button" data-action="toggle" data-id="${user.id}" title="${user.active ? 'Bloklash' : 'Faollashtirish'}" aria-label="${user.active ? 'Bloklash' : 'Faollashtirish'}">
+                  ${icon(user.active ? 'lock' : 'unlock')}
+                </button>
+                <button class="btn btn-danger btn-sm" type="button" data-action="delete" data-id="${user.id}" title="O'chirish" aria-label="O'chirish" ${user.role === 'admin' ? 'disabled' : ''}>
+                  ${icon('trash')}
+                </button>
+              </div>
+            </td>
+          </tr>
+        `)
+        .join('');
+    }
+
+    function renderPage() {
+      filteredUsers = getFilteredUsers();
+      renderStats();
+      renderFilterMeta();
+      renderRoleSummary();
+      renderRecentUsers();
+      renderUsersTable();
+    }
+
+    function refreshUsers() {
+      allUsers = [...EduCoin.getUsers()].sort((left, right) => new Date(right.createdAt || 0) - new Date(left.createdAt || 0));
+      renderPage();
+    }
+
+    function showUserModalAlert(type, message) {
+      const host = document.getElementById('userModalAlert');
+      if (!host) {
+        return;
+      }
+      host.innerHTML = `<div class="alert alert-${type}">${escapeHtml(message)}</div>`;
+    }
+
+    function clearUserModalAlert() {
+      const host = document.getElementById('userModalAlert');
+      if (host) {
+        host.innerHTML = '';
+      }
+    }
+
+    function closeUserModal() {
+      clearUserModalAlert();
+      closeModal('userModal');
+    }
+
+    function openUserModal(mode, userId = null) {
+      modalMode = mode;
+      editingUserId = userId;
+
+      const isEdit = mode === 'edit';
+      const user = isEdit ? EduCoin.getUserById(userId) : null;
+
+      if (isEdit && !user) {
+        showToast('Foydalanuvchi topilmadi.', 'error');
+        return;
+      }
+
+      clearUserModalAlert();
+      populateRoleOptions(user?.role || 'student');
+      document.getElementById('userRole').disabled = Boolean(user?.role === 'admin');
+      document.getElementById('userStatus').disabled = Boolean(user?.role === 'admin');
+
+      document.getElementById('userModalTitle').textContent = isEdit ? 'Foydalanuvchini tahrirlash' : 'Yangi foydalanuvchi';
+      document.getElementById('submitUserFormBtn').textContent = isEdit ? "O'zgarishlarni saqlash" : "Foydalanuvchini qo'shish";
+      document.getElementById('coinsLabel').textContent = isEdit ? 'Balans' : 'Boshlang\'ich balans';
+      document.getElementById('passwordHelp').textContent = isEdit
+        ? 'Parolni bo\'sh qoldirsangiz eski parol saqlanadi.'
+        : 'Yangi account uchun parol majburiy.';
+
+      document.getElementById('userName').value = user?.name || '';
+      document.getElementById('userUsername').value = user?.username || '';
+      document.getElementById('userEmail').value = user?.email || '';
+      document.getElementById('userPassword').value = '';
+      document.getElementById('userCoins').value = Number(user?.coins || 0);
+      document.getElementById('userStatus').value = user?.active === false ? 'blocked' : 'active';
+
+      openModal('userModal');
+      window.setTimeout(() => document.getElementById('userName')?.focus(), 50);
+    }
+
+    function validateEmail(email) {
+      if (!email) {
+        return true;
+      }
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    function handleUserFormSubmit(event) {
+      event.preventDefault();
+
+      const name = document.getElementById('userName').value.trim();
+      const username = document.getElementById('userUsername').value.trim();
+      const email = document.getElementById('userEmail').value.trim();
+      const password = document.getElementById('userPassword').value;
+      const role = document.getElementById('userRole').value;
+      const status = document.getElementById('userStatus').value;
+      const coins = Math.round(Number(document.getElementById('userCoins').value || 0));
+      const isEdit = modalMode === 'edit';
+      const targetUser = isEdit ? EduCoin.getUserById(editingUserId) : null;
+
+      if (name.length < 3) {
+        showUserModalAlert('danger', 'Ism kamida 3 ta belgidan iborat bo\'lishi kerak.');
+        return;
+      }
+
+      if (username.length < 3) {
+        showUserModalAlert('danger', 'Username kamida 3 ta belgidan iborat bo\'lishi kerak.');
+        return;
+      }
+
+      if (!validateEmail(email)) {
+        showUserModalAlert('danger', 'Email formatini tekshiring.');
+        return;
+      }
+
+      if (!Number.isFinite(coins) || coins < 0) {
+        showUserModalAlert('danger', 'Balans 0 yoki undan katta bo\'lishi kerak.');
+        return;
+      }
+
+      if (!isEdit && password.length < 6) {
+        showUserModalAlert('danger', 'Parol kamida 6 ta belgidan iborat bo\'lishi kerak.');
+        return;
+      }
+
+      if (isEdit && password && password.length < 6) {
+        showUserModalAlert('danger', 'Yangi parol kamida 6 ta belgidan iborat bo\'lishi kerak.');
+        return;
+      }
+
+      if (isEdit && !targetUser) {
+        showUserModalAlert('danger', 'Tahrir qilinadigan foydalanuvchi topilmadi.');
+        return;
+      }
+
+      if (targetUser?.role === 'admin' && role !== 'admin') {
+        showUserModalAlert('danger', "Admin accountni boshqa rolga o'tkazib bo'lmaydi.");
+        return;
+      }
+
+      if (targetUser?.role === 'admin' && status !== 'active') {
+        showUserModalAlert('danger', 'Admin account bloklanmaydi.');
+        return;
+      }
+
+      if (!isEdit && EduCoin.isUsernameTaken(username)) {
+        showUserModalAlert('danger', 'Bu username band.');
+        return;
+      }
+
+      if (isEdit) {
+        const updated = EduCoin.updateUser(editingUserId, {
+          name,
+          fullName: name,
+          username,
+          email,
+          role,
+          coins,
+          active: status === 'active',
+          ...(password ? { password } : {}),
+        });
+
+        if (!updated) {
+          showUserModalAlert('danger', 'Saqlashda xatolik bo\'ldi. Username takrorlangan bo\'lishi mumkin.');
+          return;
+        }
+
+        refreshUsers();
+        closeUserModal();
+        showToast(`${name} yangilandi.`, 'success');
+        return;
+      }
+
+      const created = EduCoin.addUser({
+        name,
+        fullName: name,
+        username,
+        password,
+        email,
+        role,
+        coins,
+        active: status === 'active',
+      });
+
+      if (!created) {
+        showUserModalAlert('danger', 'Foydalanuvchini saqlab bo\'lmadi.');
+        return;
+      }
+
+      refreshUsers();
+      closeUserModal();
+      showToast(`${name} tizimga qo'shildi.`, 'success');
     }
 
     function toggleUser(id) {
       const user = EduCoin.getUserById(id);
-      if (!user) return;
-      if (user.role === 'admin') { showToast('Admin bloklanmaydi!', 'error'); return; }
-      EduCoin.updateUser(id, { active: !user.active });
-      allUsers = EduCoin.getUsers();
-      filterUsers();
-      showToast(user.active ? 'Foydalanuvchi bloklandi' : 'Foydalanuvchi faollashtirildi', 'info');
+      if (!user) {
+        showToast('Foydalanuvchi topilmadi.', 'error');
+        return;
+      }
+      if (user.role === 'admin') {
+        showToast('Admin account bloklanmaydi.', 'error');
+        return;
+      }
+
+      const nextState = !user.active;
+      EduCoin.updateUser(id, { active: nextState });
+      refreshUsers();
+      showToast(nextState ? 'Foydalanuvchi faollashtirildi.' : 'Foydalanuvchi bloklandi.', nextState ? 'success' : 'warning');
     }
 
     function deleteUser(id) {
       const user = EduCoin.getUserById(id);
-      if (!user || user.role === 'admin') { showToast('Adminni o\'chirish mumkin emas!', 'error'); return; }
-      if (!confirm(`${user.name}ni o'chirishni tasdiqlaysizmi?`)) return;
-      const users = EduCoin.getUsers().filter(u => u.id !== id);
+      if (!user) {
+        showToast('Foydalanuvchi topilmadi.', 'error');
+        return;
+      }
+      if (user.role === 'admin') {
+        showToast('Admin accountni o\'chirish mumkin emas.', 'error');
+        return;
+      }
+
+      if (!confirm(`${user.name} (${user.username}) foydalanuvchisini o'chirishni tasdiqlaysizmi?`)) {
+        return;
+      }
+
+      const users = EduCoin.getUsers().filter((candidate) => candidate.id !== id);
       EduCoin.setData('users', users);
-      allUsers = EduCoin.getUsers();
-      filterUsers();
-      showToast('Foydalanuvchi o\'chirildi', 'success');
+      refreshUsers();
+      showToast('Foydalanuvchi o\'chirildi.', 'success');
     }
 
-    function addUser() {
-      const name = document.getElementById('newName').value.trim();
-      const username = document.getElementById('newUsername').value.trim();
-      const password = document.getElementById('newPassword').value;
-      const email = document.getElementById('newEmail').value.trim();
-      const role = document.getElementById('newRole').value;
-      const el = document.getElementById('addAlert');
-      if (!name||!username||!password) { el.innerHTML='<div class="alert alert-danger">Barcha maydonlarni to\'ldiring!</div>'; return; }
-      if (EduCoin.getUsers().find(u=>u.username===username)) { el.innerHTML='<div class="alert alert-danger">Bu username band!</div>'; return; }
-      EduCoin.addUser({name,username,password,email,role});
-      allUsers = EduCoin.getUsers();
-      filterUsers();
-      closeModal('addUserModal');
-      showToast(`${name} qo'shildi!`, 'success');
+    function handleTableClick(event) {
+      const actionButton = event.target.closest('[data-action]');
+      if (!actionButton) {
+        return;
+      }
+
+      const { action, id } = actionButton.dataset;
+      if (action === 'edit') {
+        openUserModal('edit', id);
+      }
+      if (action === 'toggle') {
+        toggleUser(id);
+      }
+      if (action === 'delete') {
+        deleteUser(id);
+      }
     }
+
+    function handleRecentUsersClick(event) {
+      const editButton = event.target.closest('[data-open-edit]');
+      if (!editButton) {
+        return;
+      }
+      openUserModal('edit', editButton.dataset.openEdit);
+    }
+
+    function resetFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('roleFilter').value = '';
+      document.getElementById('statusFilter').value = '';
+      document.getElementById('sortFilter').value = 'newest';
+      renderPage();
+    }
+
+    function attachEvents() {
+      document.getElementById('searchInput')?.addEventListener('input', renderPage);
+      document.getElementById('roleFilter')?.addEventListener('change', renderPage);
+      document.getElementById('statusFilter')?.addEventListener('change', renderPage);
+      document.getElementById('sortFilter')?.addEventListener('change', renderPage);
+      document.getElementById('resetFiltersBtn')?.addEventListener('click', resetFilters);
+      document.getElementById('openAddUserBtn')?.addEventListener('click', () => openUserModal('add'));
+      document.getElementById('usersBody')?.addEventListener('click', handleTableClick);
+      document.getElementById('recentUsers')?.addEventListener('click', handleRecentUsersClick);
+      document.getElementById('userForm')?.addEventListener('submit', handleUserFormSubmit);
+      document.getElementById('closeUserModalBtn')?.addEventListener('click', closeUserModal);
+      document.getElementById('cancelUserModalBtn')?.addEventListener('click', closeUserModal);
+      document.getElementById('userModal')?.addEventListener('click', (event) => {
+        if (event.target.id === 'userModal') {
+          closeUserModal();
+        }
+      });
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && document.getElementById('userModal')?.classList.contains('open')) {
+          closeUserModal();
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      hydrateStaticIcons();
+      attachEvents();
+
+      await EduCoin.init();
+      currentUser = EduCoin.requireAuth(['admin']);
+      if (!currentUser) {
+        return;
+      }
+
+      const sidebarHost = document.getElementById('sidebar-container');
+      if (sidebarHost) {
+        sidebarHost.innerHTML = buildSidebar('admin', currentUser);
+        initSidebar();
+        highlightNav();
+      }
+
+      renderTopCoinDisplay();
+      populateRoleOptions();
+      refreshUsers();
+    });
   </script>
 </body>
 </html>

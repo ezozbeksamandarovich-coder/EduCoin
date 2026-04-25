@@ -1,6 +1,8 @@
 const EDUCOIN_STORAGE_PREFIX = 'educoin_';
 const EDUCOIN_DEFAULT_UI = { blur: 'on', colorTheme: 'green' };
 const EDUCOIN_CLEAN_BOOT_KEY = 'clean_boot_v1';
+const EDUCOIN_API_BASE = '/api';
+const EDUCOIN_ALLOWED_ROLES = ['student', 'teacher', 'manager', 'director', 'admin'];
 
 const EduCoin = {
   _sessionListenerAttached: false,
@@ -16,6 +18,9 @@ const EduCoin = {
   setData(key, value) {
     try {
       localStorage.setItem(`${EDUCOIN_STORAGE_PREFIX}${key}`, JSON.stringify(value));
+      if (key === 'users') {
+        this.pushUsersToApi(value);
+      }
       return true;
     } catch (e) {
       console.error('localStorage setData:', key, e);
@@ -39,7 +44,12 @@ const EduCoin = {
 
   async init() {
     const bundled = await this.loadBundledData();
-    let users = this.normalizeUsers(this.mergeById(this.getData('users') || [], bundled.users));
+    const storedUsers = this.getData('users');
+    const isInitialized = Boolean(this.getData('initialized'));
+    const shouldUseStoredUsers = isInitialized && Array.isArray(storedUsers) && storedUsers.length > 0;
+    let users = shouldUseStoredUsers
+      ? this.normalizeUsers(storedUsers)
+      : this.normalizeUsers(this.mergeUsersByIdentity(bundled.users, storedUsers || []));
     let groups = this.normalizeGroups(this.mergeById(this.getData('groups') || [], bundled.groups));
     let shop = this.normalizeShopItems(this.mergeById(this.getData('shop') || [], bundled.shop));
     const shopRemovedIds = new Set(this.getData('shopRemovedIds') || []);
@@ -58,6 +68,7 @@ const EduCoin = {
       purchases,
       reports,
     }));
+    users = await this.fetchUsersSnapshot(users);
 
     this.setData('users', users);
     this.setData('groups', groups);
@@ -76,33 +87,148 @@ const EduCoin = {
     }
   },
 
-  applyCleanBoot(snapshot) {
-    if (this.getData(EDUCOIN_CLEAN_BOOT_KEY)) {
-      return snapshot;
+  async fetchUsersSnapshot(fallbackUsers) {
+    const apiUsers = await this.fetchUsersFromApi();
+    if (!apiUsers.length) {
+      return this.normalizeUsers(fallbackUsers);
+    }
+    return this.normalizeUsers(this.mergeUsersByIdentity(apiUsers, fallbackUsers));
+  },
+
+  async fetchUsersFromApi() {
+    try {
+      const response = await fetch(`${EDUCOIN_API_BASE}/users`, { method: 'GET' });
+      if (response.ok) {
+        const apiUsers = await response.json();
+        if (Array.isArray(apiUsers)) {
+          return this.normalizeUsers(apiUsers);
+        }
+      }
+    } catch {
+      // API unavailable: use local fallback
+    }
+    return [];
+  },
+
+  async loginViaApi(username, password) {
+    try {
+      const response = await fetch(`${EDUCOIN_API_BASE}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      if (!response.ok) {
+        return null;
+      }
+      const payload = await response.json();
+      return this.resolveApiLoginUser(payload, username);
+    } catch {
+      return null;
+    }
+  },
+
+  resolveApiLoginUser(payload, fallbackUsername = '') {
+    if (!payload || payload.success !== true) {
+      return null;
     }
 
-    const adminIds = new Set(
-      (Array.isArray(snapshot.users) ? snapshot.users : [])
-        .filter((user) => user.role === 'admin' && user.active !== false)
-        .map((user) => user.id)
+    if (payload.user) {
+      return this.normalizeUsers([payload.user])[0];
+    }
+
+    if (!payload.role) {
+      return null;
+    }
+
+    const username = String(payload.username || fallbackUsername || payload.name || 'user').trim().normalize('NFKC');
+    const name = String(payload.name || username || 'Foydalanuvchi').trim();
+    return this.normalizeUsers([
+      {
+        id: payload.id || `api_${this.normalizeComparableText(username || name) || Date.now()}`,
+        username: username || `user_${Date.now()}`,
+        password: '',
+        role: payload.role,
+        name,
+        fullName: name,
+        email: payload.email || '',
+        code: payload.code || username || '',
+        coins: payload.coins || 0,
+        active: payload.active !== false,
+        createdAt: payload.createdAt || new Date().toISOString(),
+      },
+    ])[0];
+  },
+
+  async pushUsersToApi(users) {
+    try {
+      await fetch(`${EDUCOIN_API_BASE}/users`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Array.isArray(users) ? users : []),
+      });
+    } catch {
+      // API unavailable: local storage still works
+    }
+  },
+
+  applyCleanBoot(snapshot) {
+    if (!this.getData(EDUCOIN_CLEAN_BOOT_KEY)) {
+      this.setData(EDUCOIN_CLEAN_BOOT_KEY, true);
+    }
+    return snapshot;
+  },
+
+  enforceSingleAdminUser(users) {
+    const list = Array.isArray(users) ? users : [];
+    const existingAdmin = list.find((user) => user && user.role === 'admin');
+    const now = new Date().toISOString();
+    return [
+      {
+        id: existingAdmin?.id || 'u001',
+        username: 'admin',
+        password: 'DeveloperE',
+        role: 'admin',
+        name: existingAdmin?.name || 'Admin',
+        fullName: existingAdmin?.fullName || existingAdmin?.name || 'Admin',
+        email: existingAdmin?.email || 'admin@educoin.uz',
+        code: existingAdmin?.code || 'admin001',
+        avatar: existingAdmin?.avatar || null,
+        coins: Number(existingAdmin?.coins || 0),
+        active: true,
+        createdAt: existingAdmin?.createdAt || now,
+      },
+    ];
+  },
+
+  enforceAdminOnlyData(snapshot) {
+    const admin = (Array.isArray(snapshot.users) ? snapshot.users : []).find((u) => u.role === 'admin');
+    if (!admin) {
+      return {
+        groups: [],
+        shop: [],
+        coins: [],
+        purchases: [],
+        reports: [],
+      };
+    }
+
+    const adminId = admin.id;
+    const coins = (Array.isArray(snapshot.coins) ? snapshot.coins : []).filter((tx) => {
+      const from = tx?.fromId || tx?.from;
+      const to = tx?.toId || tx?.to;
+      return from === adminId || to === adminId;
+    });
+    const purchases = (Array.isArray(snapshot.purchases) ? snapshot.purchases : []).filter(
+      (purchase) => purchase?.userId === adminId
     );
 
-    const users = (Array.isArray(snapshot.users) ? snapshot.users : []).filter((user) => adminIds.has(user.id));
-    const cleaned = {
-      users,
+    return {
       groups: [],
-      shop: [],
-      coins: [],
-      purchases: [],
+      shop: Array.isArray(snapshot.shop) ? snapshot.shop : [],
+      coins,
+      purchases,
       reports: [],
     };
-
-    this.clearSessionData();
-    localStorage.removeItem(`${EDUCOIN_STORAGE_PREFIX}remember_me`);
-    localStorage.removeItem(`${EDUCOIN_STORAGE_PREFIX}remembered_user`);
-    this.setData(EDUCOIN_CLEAN_BOOT_KEY, true);
-
-    return cleaned;
   },
 
   async loadBundledData() {
@@ -158,22 +284,92 @@ const EduCoin = {
     return Array.from(records.values());
   },
 
+  mergeUsersByIdentity(...collections) {
+    const records = new Map();
+    const aliases = new Map();
+
+    collections.forEach((collection) => {
+      (Array.isArray(collection) ? collection : []).forEach((item, index) => {
+        if (!item) {
+          return;
+        }
+
+        const normalized = this.normalizeUsers([item])[0];
+        const keys = [];
+
+        if (normalized.id) {
+          keys.push(`id:${normalized.id}`);
+        }
+
+        const usernameKey = this.normalizeComparableText(normalized.username);
+        if (usernameKey) {
+          keys.push(`username:${usernameKey}`);
+        }
+
+        const codeKey = this.normalizeComparableText(normalized.code);
+        if (codeKey) {
+          keys.push(`code:${codeKey}`);
+        }
+
+        let recordKey = keys.map((key) => aliases.get(key)).find(Boolean);
+        if (!recordKey) {
+          recordKey = keys[0] || `user:${records.size}:${index}`;
+        }
+
+        const current = records.get(recordKey) || {};
+        const merged = { ...current, ...normalized };
+        records.set(recordKey, merged);
+
+        keys.forEach((key) => aliases.set(key, recordKey));
+        if (merged.id) {
+          aliases.set(`id:${merged.id}`, recordKey);
+        }
+
+        const mergedUsernameKey = this.normalizeComparableText(merged.username);
+        if (mergedUsernameKey) {
+          aliases.set(`username:${mergedUsernameKey}`, recordKey);
+        }
+
+        const mergedCodeKey = this.normalizeComparableText(merged.code);
+        if (mergedCodeKey) {
+          aliases.set(`code:${mergedCodeKey}`, recordKey);
+        }
+      });
+    });
+
+    return Array.from(records.values());
+  },
+
+  normalizeComparableText(value) {
+    return String(value || '').trim().normalize('NFKC').toLowerCase();
+  },
+
+  normalizeRole(role) {
+    const normalizedRole = this.normalizeComparableText(role);
+    return EDUCOIN_ALLOWED_ROLES.includes(normalizedRole) ? normalizedRole : 'student';
+  },
+
   normalizeUsers(users) {
     return (Array.isArray(users) ? users : []).map((user, index) => {
-      const name = user.name || user.fullName || user.username || `User ${index + 1}`;
+      const username = String(user.username || `user${index + 1}`).trim().normalize('NFKC') || `user${index + 1}`;
+      const name = String(user.name || user.fullName || username || `User ${index + 1}`).trim() || `User ${index + 1}`;
+      const fullName = String(user.fullName || name).trim() || name;
+      const email = String(user.email || '').trim();
+      const code = String(user.code || username).trim();
+      const active = !(user.active === false || user.active === 0 || user.active === '0' || user.active === 'false');
       return {
         ...user,
         id: user.id || `u${String(index + 1).padStart(3, '0')}`,
-        username: user.username || `user${index + 1}`,
-        password: user.password || 'password123',
-        role: user.role || 'student',
+        username,
+        password: String(user.password || 'password123').normalize('NFKC'),
+        role: this.normalizeRole(user.role),
         name,
-        fullName: name,
-        email: user.email || '',
-        code: user.code || user.username || '',
+        fullName,
+        email,
+        code,
         avatar: user.avatar || null,
         coins: Number(user.coins || 0),
-        active: user.active !== false,
+        active,
         createdAt: user.createdAt || new Date().toISOString(),
       };
     });
@@ -270,19 +466,55 @@ const EduCoin = {
       }));
   },
 
-  login(username, password) {
-    const normalizedUsername = String(username || '').trim();
-    const normalizedPassword = String(password || '');
-    if (!normalizedUsername || normalizedPassword.length < 6) {
+  async login(username, password) {
+    const normalizedUsername = String(username || '').trim().normalize('NFKC');
+    const normalizedUsernameLower = normalizedUsername.toLowerCase();
+    const normalizedPassword = String(password || '').normalize('NFKC');
+    const normalizedPasswordTrimmed = normalizedPassword.trim();
+    if (!normalizedUsername || !normalizedPasswordTrimmed) {
       return null;
     }
 
-    const user = this.getUsers().find(
-      (candidate) =>
-        candidate.username === normalizedUsername &&
-        candidate.password === normalizedPassword &&
-        candidate.active
-    );
+    const backendUser = await this.loginViaApi(normalizedUsername, normalizedPassword);
+    let user = backendUser || null;
+
+    if (!user) {
+      user = this.getUsers().find(
+        (candidate) =>
+          (
+            String(candidate.username || '').normalize('NFKC').toLowerCase() === normalizedUsernameLower ||
+            String(candidate.name || '').normalize('NFKC').toLowerCase() === normalizedUsernameLower ||
+            String(candidate.fullName || '').normalize('NFKC').toLowerCase() === normalizedUsernameLower
+          ) &&
+          (
+            String(candidate.password || '').normalize('NFKC') === normalizedPassword ||
+            String(candidate.password || '').normalize('NFKC').trim() === normalizedPasswordTrimmed ||
+            String(candidate.password || '').normalize('NFKC').toLowerCase() === normalizedPassword.toLowerCase()
+          ) &&
+          candidate.active
+      );
+    }
+
+    // Fallback: localStorage dagi xom users massivini ham tekshiramiz.
+    if (!user) {
+      const rawUsers = this.getData('users') || [];
+      const rawMatch = (Array.isArray(rawUsers) ? rawUsers : []).find((candidate) => {
+        const candidateUsername = String(candidate?.username || '').trim().normalize('NFKC').toLowerCase();
+        const candidateName = String(candidate?.name || candidate?.fullName || '').trim().normalize('NFKC').toLowerCase();
+        const candidatePassword = String(candidate?.password || '').normalize('NFKC');
+        const usernameOk = candidateUsername === normalizedUsernameLower || candidateName === normalizedUsernameLower;
+        const passwordOk =
+          candidatePassword === normalizedPassword ||
+          candidatePassword.trim() === normalizedPasswordTrimmed ||
+          candidatePassword.toLowerCase() === normalizedPassword.toLowerCase();
+        const activeOk = candidate?.active !== false;
+        return usernameOk && passwordOk && activeOk;
+      });
+      if (rawMatch) {
+        user = this.normalizeUsers([rawMatch])[0];
+      }
+    }
+
     if (!user) {
       return null;
     }
@@ -418,8 +650,18 @@ const EduCoin = {
 
     try {
       const session = JSON.parse(rawSession);
-      const user = this.getUsers().find((candidate) => candidate.id === session.id && candidate.active);
-      return user ? { ...user, sessionId: session.sessionId, loginTime: session.loginTime, rememberMe: Boolean(session.rememberMe) } : null;
+      const sessionUsername = this.normalizeComparableText(session.username);
+      const user = this.getUsers().find(
+        (candidate) =>
+          candidate.active &&
+          (
+            candidate.id === session.id ||
+            (sessionUsername && this.normalizeComparableText(candidate.username) === sessionUsername)
+          )
+      );
+      return user
+        ? { ...user, sessionId: session.sessionId, loginTime: session.loginTime, rememberMe: Boolean(session.rememberMe) }
+        : null;
     } catch {
       this.clearSessionData({ preserveRememberedUser: true });
       return null;
@@ -467,9 +709,33 @@ const EduCoin = {
     return this.getUsers().filter((user) => user.role === role);
   },
 
+  isUsernameTaken(username, excludeId = null) {
+    const target = this.normalizeComparableText(username);
+    if (!target) {
+      return false;
+    }
+    return this.getUsers().some(
+      (user) => user.id !== excludeId && this.normalizeComparableText(user.username) === target
+    );
+  },
+
   addUser(userData) {
+    const username = String(userData?.username || '').trim().normalize('NFKC');
+    if (!username || this.isUsernameTaken(username)) {
+      return null;
+    }
+
     const users = this.getUsers();
-    const next = this.normalizeUsers([{ id: `u${Date.now()}`, coins: 0, active: true, createdAt: new Date().toISOString(), ...userData }])[0];
+    const next = this.normalizeUsers([
+      {
+        id: `u${Date.now()}`,
+        username,
+        coins: 0,
+        active: true,
+        createdAt: new Date().toISOString(),
+        ...userData,
+      },
+    ])[0];
     users.push(next);
     this.setData('users', users);
     return next;
@@ -479,6 +745,9 @@ const EduCoin = {
     const users = this.getUsers();
     const index = users.findIndex((user) => user.id === id);
     if (index === -1) {
+      return null;
+    }
+    if (updates?.username && this.isUsernameTaken(updates.username, id)) {
       return null;
     }
     users[index] = this.normalizeUsers([{ ...users[index], ...updates }])[0];

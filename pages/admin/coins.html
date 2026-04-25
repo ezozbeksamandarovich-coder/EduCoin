@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="EduCoin admin coin markazi">
+  <meta name="theme-color" content="#050A05">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <title>EduCoin - Admin EduCoinlar</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/dashboard.css">
+</head>
+<body class="blur-on">
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+    <div class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="hamburger" aria-label="Menyu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <div>
+            <div class="topbar-title" id="pageTopbarTitle">EduCoinlar</div>
+            <div class="market-topbar-subtitle" id="pageTopbarSubtitle">Coin markazi yuklanmoqda</div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="coin-display" id="topCoinDisplay">0 coin</div>
+          <span class="badge" id="coinRoleBadge" hidden></span>
+        </div>
+      </header>
+
+      <div class="page-content">
+        <section class="coin-hero">
+          <div>
+            <div class="market-kicker">Admin Coin Center</div>
+            <h1 id="coinHeroTitle">EduCoinlar</h1>
+            <p id="coinHeroSubtitle">Balansingiz, tarix va coin harakatlari bir joyda.</p>
+          </div>
+          <div class="coin-hero-actions-wrap">
+            <div class="coin-hero-balance">
+              <span class="label">Admin balans</span>
+              <strong id="coinHeroBalance">0 coin</strong>
+            </div>
+            <div class="coin-hero-actions" id="coinHeroActions"></div>
+          </div>
+        </section>
+
+        <section class="coin-summary-grid" id="coinSummaryGrid"></section>
+
+        <section class="grid grid-2 coin-overview-grid">
+          <div class="card">
+            <div class="card-toolbar">
+              <div>
+                <div class="card-title">Haftalik coin oqimi</div>
+                <div class="users-section-desc">Butun tizim bo'yicha 7 kunlik harakat</div>
+              </div>
+            </div>
+            <div id="coinFlow"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-toolbar">
+              <div>
+                <div class="card-title">Tizim markazi</div>
+                <div class="users-section-desc">Top balans, hisobot va umumiy nazorat holati</div>
+              </div>
+            </div>
+            <div id="coinInsight"></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="market-toolbar">
+            <div class="search-bar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="7"></circle>
+                <line x1="20" y1="20" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="coinSearchInput" placeholder="Sabab, user yoki tranzaksiya turi bo'yicha qidiring...">
+            </div>
+            <select class="form-control" id="coinTypeFilter">
+              <option value="">Barcha turlar</option>
+              <option value="award">Mukofot</option>
+              <option value="transfer">O'tkazma</option>
+              <option value="purchase">Xarid</option>
+            </select>
+            <div id="coinRoleFilterWrap" hidden>
+              <select class="form-control" id="coinRoleFilter"></select>
+            </div>
+            <select class="form-control" id="coinSortFilter">
+              <option value="newest">Eng yangi</option>
+              <option value="oldest">Eng eski</option>
+              <option value="amount-desc">Miqdori katta</option>
+              <option value="amount-asc">Miqdori kichik</option>
+            </select>
+          </div>
+          <div class="card-toolbar market-toolbar-meta">
+            <div class="users-section-desc" id="coinFilterHint">Barcha tranzaksiyalar ko'rsatilmoqda</div>
+            <span class="badge badge-primary" id="coinResultCount">0 ta</span>
+          </div>
+        </section>
+
+        <section class="grid grid-2 coin-main-grid">
+          <div class="card">
+            <div class="card-toolbar">
+              <div>
+                <div class="card-title">Tranzaksiya markazi</div>
+                <div class="users-section-desc">Barcha foydalanuvchilarning coin harakati</div>
+              </div>
+            </div>
+            <div id="coinTransactionList"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-toolbar">
+              <div>
+                <div class="card-title">Coin nazorati</div>
+                <div class="users-section-desc">Top balanslar va stock xavfi</div>
+              </div>
+            </div>
+            <div id="coinSidePanel"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="coinAwardModal">
+    <div class="modal users-modal">
+      <div class="modal-header">
+        <div class="modal-title">Coin berish</div>
+        <button class="modal-close" type="button" id="coinAwardCloseBtn">x</button>
+      </div>
+      <div class="modal-body">
+        <div id="coinAwardAlert"></div>
+        <div class="market-modal-grid">
+          <div class="form-group full-span">
+            <label class="form-label" for="coinAwardTargetInput">Foydalanuvchi</label>
+            <select class="form-control" id="coinAwardTargetInput"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="coinAwardAmountInput">Coin miqdori</label>
+            <input class="form-control" id="coinAwardAmountInput" type="number" min="1" step="1" placeholder="50">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="coinAwardReasonInput">Sabab</label>
+            <input class="form-control" id="coinAwardReasonInput" type="text" placeholder="Mukofot sababi">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" id="coinAwardCancelBtn">Bekor</button>
+        <button class="btn btn-primary" type="button" id="coinAwardSubmitBtn">Saqlash</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../js/auth.js"></script>
+  <script src="../../js/main.js"></script>
+  <script src="../../js/coins-page.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initCoinsPage({
+        allowedRoles: ['admin'],
+        mode: 'admin',
+        topbarTitle: 'EduCoinlar',
+        topbarSubtitle: 'Admin coin nazorati',
+        heroTitle: 'Admin coin markazi',
+        heroSubtitle: "Muomaladagi coinlar, tranzaksiyalar va mukofot nazoratini shu markazdan boshqaring.",
+        roleBadgeLabel: 'ADMIN',
+        roleBadgeClass: 'badge-danger',
+        actions: [
+          { type: 'button', action: 'open-award', label: "Coin berish" },
+          { type: 'link', href: 'users.html', label: 'Userlar', variant: 'secondary' }
+        ]
+      });
+    });
+  </script>
+</body>
+</html>

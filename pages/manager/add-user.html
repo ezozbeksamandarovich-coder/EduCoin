@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="EduCoin — ta'lim mukofot tizimi">
+  <meta name="description" content="EduCoin foydalanuvchi qo'shish oynasi">
   <meta name="theme-color" content="#050A05">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <title>EduCoin — User qo'shish</title>
+  <title>EduCoin - Foydalanuvchi qo'shish</title>
   <link rel="stylesheet" href="../../css/style.css">
   <link rel="stylesheet" href="../../css/dashboard.css">
 </head>
@@ -17,147 +17,119 @@
     <div id="sidebar-container"></div>
     <div class="main-content">
       <header class="topbar">
-        <div style="display:flex;align-items:center;gap:12px">
+        <div style="display:flex;align-items:center;gap:12px;">
           <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
-          <div class="topbar-title">👤➕ Foydalanuvchi qo'shish</div>
+          <div>
+            <div class="topbar-title">Foydalanuvchi qo'shish</div>
+            <div style="font-size:12px;color:var(--text3);">Login va rol boshqaruvi</div>
+          </div>
         </div>
-        <div class="topbar-right"><div class="coin-display" id="topCoinDisplay">🪙 0</div></div>
+        <div class="topbar-right">
+          <div class="coin-display" id="topCoinDisplay">0 coin</div>
+        </div>
       </header>
+
       <div class="page-content">
-        <div class="page-header"><div><h1>👤 Yangi foydalanuvchi</h1><p>Tizimga yangi o'quvchi, o'qituvchi yoki menejer qo'shing</p></div></div>
+        <div class="page-header">
+          <div>
+            <h1 id="pageTitle">Yangi foydalanuvchi</h1>
+            <p id="pageDescription">Yangi foydalanuvchi yaratish uchun formani to'ldiring.</p>
+          </div>
+          <span class="badge role-badge" id="actorBadge" data-role="manager">Menejer rejimi</span>
+        </div>
+
+        <div class="grid grid-4" style="margin-bottom:24px;">
+          <div class="stat-card">
+            <div class="stat-info">
+              <div class="label">Jami user</div>
+              <div class="value" id="totalUsers">0</div>
+              <div class="change">Tizimdagi foydalanuvchilar</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-info">
+              <div class="label">Faol user</div>
+              <div class="value" id="activeUsers">0</div>
+              <div class="change">Login qilishi mumkin</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-info">
+              <div class="label">Bugun qo'shilgan</div>
+              <div class="value" id="todayUsers">0</div>
+              <div class="change">Bugungi yaratmalar</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-info">
+              <div class="label">Ruxsatli rollar</div>
+              <div class="value" id="creatableRoles">0</div>
+              <div class="change">Siz bera oladigan rollar</div>
+            </div>
+          </div>
+        </div>
+
         <div class="grid grid-2">
           <div class="card">
-            <h3 style="margin-bottom:20px">Yangi foydalanuvchi formasi</h3>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;">
+              <h3>Yangi foydalanuvchi formasi</h3>
+              <span class="badge badge-primary">Darhol saqlanadi</span>
+            </div>
             <div id="formAlert"></div>
-            <div class="form-group">
-              <label class="form-label">To'liq ism</label>
-              <input type="text" class="form-control" id="fullName" placeholder="Masalan: Jasur Nazarov">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Username</label>
-              <input type="text" class="form-control" id="username" placeholder="Masalan: jasur01">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Parol</label>
-              <input type="text" class="form-control" id="password" placeholder="Kamida 4 ta belgi">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Email (ixtiyoriy)</label>
-              <input type="email" class="form-control" id="email" placeholder="email@example.com">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Rol</label>
-              <select class="form-control" id="role" onchange="onRoleChange()">
-                <option value="student">🎒 O'quvchi</option>
-                <option value="teacher">📚 O'qituvchi</option>
-                <option value="manager">📋 Menejer</option>
-                <option value="director">🎯 Direktor</option>
-              </select>
-            </div>
-            <div class="form-group" id="groupField">
-              <label class="form-label">Guruh (o'quvchi uchun)</label>
-              <select class="form-control" id="groupId">
-                <option value="">— Guruh tanlang —</option>
-              </select>
-            </div>
-            <button class="btn btn-primary btn-full btn-lg" onclick="addUser()">➕ Qo'shish</button>
+            <form id="addUserForm">
+              <div class="form-group">
+                <label class="form-label" for="fullName">To'liq ism</label>
+                <input type="text" class="form-control" id="fullName" placeholder="Masalan: Jasur Nazarov">
+              </div>
+              <div class="grid grid-2">
+                <div class="form-group">
+                  <label class="form-label" for="username">Username</label>
+                  <input type="text" class="form-control" id="username" placeholder="Masalan: jasur01">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="password">Parol</label>
+                  <input type="text" class="form-control" id="password" placeholder="Kamida 6 ta belgi">
+                </div>
+              </div>
+              <div class="grid grid-2">
+                <div class="form-group">
+                  <label class="form-label" for="email">Email</label>
+                  <input type="email" class="form-control" id="email" placeholder="email@example.com">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="initialCoins">Boshlang'ich coin</label>
+                  <input type="number" class="form-control" id="initialCoins" placeholder="0" min="0">
+                </div>
+              </div>
+              <div class="grid grid-2">
+                <div class="form-group">
+                  <label class="form-label" for="role">Rol</label>
+                  <select class="form-control" id="role"></select>
+                </div>
+                <div class="form-group" id="groupField">
+                  <label class="form-label" for="groupId">Guruh</label>
+                  <select class="form-control" id="groupId"></select>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary btn-full">Foydalanuvchini qo'shish</button>
+            </form>
           </div>
 
           <div class="card">
-            <h3 style="margin-bottom:16px">👥 So'nggi qo'shilgan foydalanuvchilar</h3>
+            <h3 style="margin-bottom:16px;">Oxirgi yaratilgan login</h3>
+            <div id="lastCreatedUser" style="margin-bottom:18px;">
+              <div class="alert alert-info">User yaratilgach username va parol shu yerda ko'rinadi.</div>
+            </div>
+            <h3 style="margin-bottom:16px;">So'nggi foydalanuvchilar</h3>
             <div id="recentUsers"></div>
           </div>
         </div>
       </div>
     </div>
   </div>
+
   <script src="../../js/auth.js"></script>
   <script src="../../js/main.js"></script>
-  <script>
-    let currentUser;
-    document.addEventListener('DOMContentLoaded', async () => {
-      await EduCoin.init();
-      currentUser = EduCoin.requireAuth(['manager','director','admin']);
-      if (!currentUser) return;
-      document.getElementById('sidebar-container').innerHTML = buildSidebar(currentUser.role, currentUser);
-      document.getElementById('topCoinDisplay').textContent = `🪙 ${(currentUser.coins||0).toLocaleString()}`;
-      const groups = EduCoin.getGroups();
-      const sel = document.getElementById('groupId');
-      groups.forEach(g => {
-        const o = document.createElement('option'); o.value=g.id; o.textContent=g.name; sel.appendChild(o);
-      });
-      renderRecent();
-    });
-
-    function onRoleChange() {
-      const role = document.getElementById('role').value;
-      document.getElementById('groupField').style.display = role==='student' ? 'block' : 'none';
-    }
-
-    function addUser() {
-      const name = document.getElementById('fullName').value.trim();
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value;
-      const email = document.getElementById('email').value.trim();
-      const role = document.getElementById('role').value;
-      const groupId = document.getElementById('groupId').value;
-      const el = document.getElementById('formAlert');
-
-      if (!name) { el.innerHTML='<div class="alert alert-danger">Ism kiriting!</div>'; return; }
-      if (!username) { el.innerHTML='<div class="alert alert-danger">Username kiriting!</div>'; return; }
-      if (password.length < 4) { el.innerHTML='<div class="alert alert-danger">Parol kamida 4 ta belgi!</div>'; return; }
-
-      const exists = EduCoin.getUsers().find(u=>u.username===username);
-      if (exists) { el.innerHTML='<div class="alert alert-danger">Bu username band!</div>'; return; }
-
-      const userData = { name, username, password, email, role };
-      if (role==='student' && groupId) {
-        userData.groupId = groupId;
-        const groups = EduCoin.getGroups();
-        const gIdx = groups.findIndex(g=>g.id===groupId);
-        if (gIdx !== -1) { groups[gIdx].studentIds.push('TEMP'); EduCoin.setData('groups', groups); }
-      }
-
-      const newUser = EduCoin.addUser(userData);
-
-      if (role==='student' && groupId) {
-        const groups = EduCoin.getGroups();
-        const gIdx = groups.findIndex(g=>g.id===groupId);
-        if (gIdx !== -1) {
-          groups[gIdx].studentIds = groups[gIdx].studentIds.filter(id=>id!=='TEMP');
-          groups[gIdx].studentIds.push(newUser.id);
-          EduCoin.setData('groups', groups);
-        }
-      }
-
-      el.innerHTML='<div class="alert alert-success">✅ Foydalanuvchi muvaffaqiyatli qo\'shildi!</div>';
-      document.getElementById('fullName').value='';
-      document.getElementById('username').value='';
-      document.getElementById('password').value='';
-      document.getElementById('email').value='';
-      renderRecent();
-      showToast(`${name} tizimga qo'shildi!`, 'success');
-      setTimeout(()=>el.innerHTML='',4000);
-    }
-
-    function renderRecent() {
-      const users = EduCoin.getUsers().slice(-6).reverse();
-      const roleLabels={student:"O'quvchi",teacher:"O'qituvchi",manager:"Menejer",director:"Direktor",admin:"Admin"};
-      const roleColors={student:'#4CAF50',teacher:'#2196F3',manager:'#FF9800',director:'#9C27B0',admin:'#F44336'};
-      document.getElementById('recentUsers').innerHTML = users.map(u=>`
-        <div class="user-card" style="margin-bottom:10px">
-          <div class="user-card-avatar">${getInitials(u.name)}</div>
-          <div class="user-card-info">
-            <div class="user-card-name">${u.name}</div>
-            <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
-              <span class="badge" style="background:${roleColors[u.role]}22;color:${roleColors[u.role]}">${roleLabels[u.role]}</span>
-              <span style="font-size:12px;color:var(--text3)">${u.username}</span>
-            </div>
-          </div>
-          <div class="user-card-coins">${(u.coins||0).toLocaleString()} 🪙</div>
-        </div>
-      `).join('');
-    }
-  </script>
+  <script src="../../js/add-user-page.js"></script>
 </body>
 </html>

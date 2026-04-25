@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="EduCoin — ta'lim mukofot tizimi">
+  <meta name="description" content="EduCoin guruhlar boshqaruvi">
   <meta name="theme-color" content="#050A05">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <title>EduCoin — Guruhlar</title>
+  <title>EduCoin - Guruhlar</title>
   <link rel="stylesheet" href="../../css/style.css">
   <link rel="stylesheet" href="../../css/dashboard.css">
 </head>
@@ -17,48 +17,25 @@
     <div id="sidebar-container"></div>
     <div class="main-content">
       <header class="topbar">
-        <div style="display:flex;align-items:center;gap:12px">
+        <div style="display:flex;align-items:center;gap:12px;">
           <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
-          <div class="topbar-title">👥 Guruhlar</div>
+          <div>
+            <div class="topbar-title">Guruhlar</div>
+            <div style="font-size:12px;color:var(--text3);">Barcha guruhlar va tarkib nazorati</div>
+          </div>
         </div>
         <div class="topbar-right">
-          <div class="coin-display" id="topCoinDisplay">🪙 0</div>
+          <div class="coin-display" id="topCoinDisplay">0 coin</div>
         </div>
       </header>
       <div class="page-content">
         <div class="page-header">
-          <div><h1>👥 Mening guruhlarim</h1><p>O'quvchilar ro'yxati va coin berish</p></div>
+          <div>
+            <h1>Barcha guruhlar</h1>
+            <p>O'qituvchi, o'quvchi soni va jadvalni bir joyda ko'ring.</p>
+          </div>
         </div>
         <div id="groupsContainer"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Award Modal -->
-  <div class="modal-overlay" id="awardModal">
-    <div class="modal">
-      <div class="modal-header">
-        <div class="modal-title">🎁 Coin berish</div>
-        <button class="modal-close" onclick="closeModal('awardModal')">×</button>
-      </div>
-      <div class="modal-body">
-        <div id="awardAlert"></div>
-        <div style="background:var(--bg3);border-radius:10px;padding:12px;margin-bottom:16px">
-          <div style="font-size:12px;color:var(--text3)">O'quvchi</div>
-          <div style="font-size:16px;font-weight:700" id="awardTargetName">—</div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Coin miqdori</label>
-          <input type="number" class="form-control" id="awardAmount" placeholder="Masalan: 50" min="1">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Sabab</label>
-          <input type="text" class="form-control" id="awardReason" placeholder="Nima uchun?">
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('awardModal')">Bekor</button>
-        <button class="btn btn-primary" onclick="giveCoins()">🎁 Berish</button>
       </div>
     </div>
   </div>
@@ -66,76 +43,72 @@
   <script src="../../js/auth.js"></script>
   <script src="../../js/main.js"></script>
   <script>
-    let currentUser, selectedStudentId;
+    let currentUser;
+
     document.addEventListener('DOMContentLoaded', async () => {
       await EduCoin.init();
-      currentUser = EduCoin.requireAuth(['teacher']);
+      currentUser = EduCoin.requireAuth(['manager', 'director', 'admin']);
       if (!currentUser) return;
-      document.getElementById('sidebar-container').innerHTML = buildSidebar('teacher', currentUser);
-      document.getElementById('topCoinDisplay').textContent = `🪙 ${(currentUser.coins||0).toLocaleString()}`;
+
+      document.getElementById('sidebar-container').innerHTML = buildSidebar(currentUser.role, currentUser);
+      document.getElementById('topCoinDisplay').textContent = EduCoin.formatCoins(currentUser.coins || 0);
       renderGroups();
     });
 
     function renderGroups() {
-      const groups = EduCoin.getTeacherGroups(currentUser.id);
-      const el = document.getElementById('groupsContainer');
+      const groups = EduCoin.getGroups();
+      const host = document.getElementById('groupsContainer');
+
       if (!groups.length) {
-        el.innerHTML = '<div class="card"><div class="empty-state"><div class="icon">👥</div><p>Sizga hali guruh tayinlanmagan</p></div></div>';
+        host.innerHTML = '<div class="card"><div class="empty-state"><div class="icon">?</div><p>Hali guruhlar yaratilmagan.</p></div></div>';
         return;
       }
-      el.innerHTML = groups.map(g => {
-        const students = g.studentIds.map(id => EduCoin.getUserById(id)).filter(Boolean);
-        return `<div class="card" style="margin-bottom:20px">
-          <div class="group-header">
-            <div>
-              <div class="group-name">📚 ${g.name}</div>
-              <div style="font-size:13px;color:var(--text3);margin-top:4px">📅 ${g.schedule||'—'} &nbsp;•&nbsp; 📊 ${g.level||'—'}</div>
+
+      host.innerHTML = groups.map((group) => {
+        const teacher = group.teacherId ? EduCoin.getUserById(group.teacherId) : null;
+        const students = (group.studentIds || []).map((id) => EduCoin.getUserById(id)).filter(Boolean);
+
+        return `
+          <div class="card" style="margin-bottom:18px;">
+            <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;">
+              <div>
+                <h3 style="margin-bottom:6px;">${group.name}</h3>
+                <div style="font-size:13px;color:var(--text3);">
+                  O'qituvchi: ${teacher ? teacher.name : 'Biriktirilmagan'}
+                </div>
+                <div style="font-size:13px;color:var(--text3);margin-top:4px;">
+                  Jadval: ${group.schedule || 'Kiritilmagan'} | Daraja: ${group.level || 'Kiritilmagan'}
+                </div>
+              </div>
+              <span class="badge badge-primary">${students.length} o'quvchi</span>
             </div>
-            <span class="badge badge-primary">${students.length} o'quvchi</span>
+            <div class="divider"></div>
+            ${
+              students.length
+                ? `
+                  <div class="table-wrap">
+                    <table>
+                      <thead>
+                        <tr><th>#</th><th>Ism</th><th>Username</th><th>Balans</th></tr>
+                      </thead>
+                      <tbody>
+                        ${students.map((student, index) => `
+                          <tr>
+                            <td>${index + 1}</td>
+                            <td>${student.name}</td>
+                            <td>${student.username}</td>
+                            <td>${(student.coins || 0).toLocaleString()} coin</td>
+                          </tr>
+                        `).join('')}
+                      </tbody>
+                    </table>
+                  </div>
+                `
+                : '<div class="empty-state"><p>Bu guruhda hali o\'quvchi yo\'q.</p></div>'
+            }
           </div>
-          <div class="divider"></div>
-          ${students.length === 0 ? '<div class="empty-state" style="padding:20px"><p>Bu guruhda o\'quvchi yo\'q</p></div>' :
-          `<div class="table-wrap"><table>
-            <thead><tr><th>#</th><th>Ism</th><th>Username</th><th>Balans</th><th>Amal</th></tr></thead>
-            <tbody>
-              ${students.map((s,i) => `<tr>
-                <td style="color:var(--text3)">${i+1}</td>
-                <td><div style="display:flex;align-items:center;gap:10px">
-                  <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">${getInitials(s.name)}</div>
-                  <span style="font-weight:600">${s.name}</span>
-                </div></td>
-                <td style="font-family:'Space Mono',monospace">${s.username}</td>
-                <td><span style="color:var(--coin);font-weight:700;font-family:'Space Mono',monospace">${(s.coins||0).toLocaleString()} 🪙</span></td>
-                <td><button class="btn btn-success btn-sm" onclick="openAward('${s.id}','${s.name}')">🎁 Coin ber</button></td>
-              </tr>`).join('')}
-            </tbody>
-          </table></div>`}
-        </div>`;
+        `;
       }).join('');
-    }
-
-    function openAward(studentId, name) {
-      selectedStudentId = studentId;
-      document.getElementById('awardTargetName').textContent = name;
-      document.getElementById('awardAmount').value = '';
-      document.getElementById('awardReason').value = '';
-      document.getElementById('awardAlert').innerHTML = '';
-      openModal('awardModal');
-    }
-
-    function giveCoins() {
-      const amount = parseInt(document.getElementById('awardAmount').value);
-      const reason = document.getElementById('awardReason').value || 'Mukofot';
-      const el = document.getElementById('awardAlert');
-      if (!amount||amount<1) { el.innerHTML='<div class="alert alert-danger">Miqdor kiriting!</div>'; return; }
-      const result = EduCoin.awardCoins(currentUser.id, selectedStudentId, amount, reason);
-      if (result.success) {
-        closeModal('awardModal');
-        showToast('✅ Coin muvaffaqiyatli berildi!', 'success');
-        renderGroups();
-      } else {
-        el.innerHTML=`<div class="alert alert-danger">${result.msg}</div>`;
-      }
     }
   </script>
 </body>

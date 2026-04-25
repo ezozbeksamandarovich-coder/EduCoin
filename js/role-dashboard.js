@@ -70,10 +70,13 @@ const RoleDashboard = {
     const users = EduCoin.getUsers().filter((item) => item.active);
     const students = users.filter((item) => item.role === 'student');
     const teachers = users.filter((item) => item.role === 'teacher');
+    const managers = users.filter((item) => item.role === 'manager');
+    const directors = users.filter((item) => item.role === 'director');
     const groups = EduCoin.getGroups();
     const shopItems = EduCoin.getActiveShopItems();
     const transactions = EduCoin.getRecentTransactions(50);
     const purchases = EduCoin.getData('purchases') || [];
+    const reports = EduCoin.getReports();
     const leaderboard = EduCoin.getLeaderboard();
     const weekly = EduCoin.getWeeklySeries(7);
     const userTransactions = EduCoin.getUserTransactions(user.id);
@@ -87,10 +90,13 @@ const RoleDashboard = {
       users,
       students,
       teachers,
+      managers,
+      directors,
       groups,
       shopItems,
       transactions,
       purchases,
+      reports,
       leaderboard,
       weekly,
       userTransactions,
@@ -241,9 +247,9 @@ const RoleDashboard = {
     `;
   },
 
-  renderQuickActions(actions) {
+  renderQuickActions(actions, compact = false) {
     return `
-      <div class="quick-actions" style="margin-bottom:24px;">
+      <div class="quick-actions ${compact ? 'quick-actions-compact' : ''}" style="margin-bottom:24px;">
         ${actions.map((action) => {
           const iconSvg = typeof getUiIcon === 'function' ? getUiIcon(action.icon) : `<span>${this.escapeHtml(action.icon)}</span>`;
           return `
@@ -291,6 +297,214 @@ const RoleDashboard = {
             </div>
           `;
         }).join('')}
+      </div>
+    `;
+  },
+
+  renderUserDirectory(users) {
+    if (!users.length) {
+      return this.emptyState('Foydalanuvchilar topilmadi');
+    }
+
+    return `
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        ${users.map((user) => `
+          <div class="card card-sm">
+            <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;">
+              <div style="display:flex;align-items:center;gap:12px;min-width:0;">
+                <div class="user-avatar">${this.escapeHtml(getInitials(user.name))}</div>
+                <div style="min-width:0;">
+                  <div style="font-weight:700;">${this.escapeHtml(user.name)}</div>
+                  <div style="font-size:13px;color:var(--text3);">@${this.escapeHtml(user.username)}</div>
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div><span class="badge" style="background:${EduCoin.roleBadgeColor(user.role)};color:#fff;">${this.escapeHtml(EduCoin.roleLabel(user.role))}</span></div>
+                <div style="font-size:12px;color:var(--text3);margin-top:6px;">${this.escapeHtml(EduCoin.formatCoins(user.coins || 0))}</div>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  },
+
+  renderRoleHub(ctx) {
+    const cards = [
+      {
+        title: "O'quvchilar",
+        count: ctx.students.length,
+        meta: ctx.leaderboard[0] ? `Lider: ${ctx.leaderboard[0].name}` : 'Lider mavjud emas',
+        note: `${ctx.groups.length} ta guruh ichida faol`,
+        color: 'rgba(0,255,136,0.12)',
+        accent: 'var(--success)',
+      },
+      {
+        title: "O'qituvchilar",
+        count: ctx.teachers.length,
+        meta: `${ctx.groups.filter((group) => group.teacherId).length} ta biriktirilgan guruh`,
+        note: 'Mukofot va guruh nazorati',
+        color: 'rgba(33,150,243,0.12)',
+        accent: '#2196F3',
+      },
+      {
+        title: 'Menejerlar',
+        count: ctx.managers.length,
+        meta: `${ctx.reports.length} ta hisobot mavjud`,
+        note: 'Jarayon va hisobot oqimi',
+        color: 'rgba(255,152,0,0.12)',
+        accent: '#FF9800',
+      },
+      {
+        title: 'Direktorlar',
+        count: ctx.directors.length,
+        meta: `${ctx.shopItems.length} ta faol mahsulot`,
+        note: 'Tizim va shop nazorati',
+        color: 'rgba(156,39,176,0.12)',
+        accent: '#9C27B0',
+      },
+    ];
+
+    return `
+      <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;">
+        ${cards.map((card) => `
+          <div class="card card-sm" style="background:linear-gradient(135deg, ${card.color}, rgba(255,255,255,0.02));">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+              <div>
+                <div style="font-size:13px;color:var(--text3);">${this.escapeHtml(card.title)}</div>
+                <div style="font-size:28px;font-weight:800;color:${card.accent};margin-top:6px;">${this.escapeHtml(String(card.count))}</div>
+              </div>
+              <span class="badge" style="background:${card.accent};color:#fff;">Hub</span>
+            </div>
+            <div style="margin-top:12px;font-weight:700;">${this.escapeHtml(card.meta)}</div>
+            <div style="margin-top:6px;font-size:13px;color:var(--text2);">${this.escapeHtml(card.note)}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  },
+
+  renderCoinCenter(ctx) {
+    const awardTotal = ctx.transactions.filter((tx) => tx.type === 'award').reduce((sum, tx) => sum + Math.abs(tx.amount || 0), 0);
+    const transferTotal = ctx.transactions.filter((tx) => tx.type === 'transfer').reduce((sum, tx) => sum + Math.abs(tx.amount || 0), 0);
+    const purchaseTotal = ctx.transactions.filter((tx) => tx.type === 'purchase').reduce((sum, tx) => sum + Math.abs(tx.amount || 0), 0);
+    const topBalances = [...ctx.users].sort((a, b) => (b.coins || 0) - (a.coins || 0)).slice(0, 5);
+
+    return `
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;">
+          <div class="card card-sm">
+            <div style="font-size:12px;color:var(--text3);">Mukofotlar</div>
+            <div style="font-size:22px;font-weight:800;color:var(--success);margin-top:8px;">${awardTotal.toLocaleString()}</div>
+            <div style="font-size:12px;color:var(--text3);">coin berilgan</div>
+          </div>
+          <div class="card card-sm">
+            <div style="font-size:12px;color:var(--text3);">O'tkazmalar</div>
+            <div style="font-size:22px;font-weight:800;color:#2196F3;margin-top:8px;">${transferTotal.toLocaleString()}</div>
+            <div style="font-size:12px;color:var(--text3);">coin aylangan</div>
+          </div>
+          <div class="card card-sm">
+            <div style="font-size:12px;color:var(--text3);">Do'kon xaridi</div>
+            <div style="font-size:22px;font-weight:800;color:#FF9800;margin-top:8px;">${purchaseTotal.toLocaleString()}</div>
+            <div style="font-size:12px;color:var(--text3);">coin sarflangan</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          ${topBalances.map((user, index) => `
+            <div style="display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div style="min-width:28px;font-weight:800;color:var(--text3);">#${index + 1}</div>
+                <div class="user-avatar">${this.escapeHtml(getInitials(user.name))}</div>
+                <div>
+                  <div style="font-weight:700;">${this.escapeHtml(user.name)}</div>
+                  <div style="font-size:13px;color:var(--text3);">${this.escapeHtml(EduCoin.roleLabel(user.role))}</div>
+                </div>
+              </div>
+              <div style="font-weight:800;color:var(--coin);">${this.escapeHtml(EduCoin.formatCoins(user.coins || 0))}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  },
+
+  renderTeacherLoad(ctx) {
+    const records = ctx.teachers.map((teacher) => {
+      const teacherGroups = ctx.groups.filter((group) => group.teacherId === teacher.id);
+      const students = teacherGroups.reduce((sum, group) => sum + (group.studentIds || []).length, 0);
+      return { teacher, groupCount: teacherGroups.length, students };
+    }).sort((a, b) => (b.groupCount - a.groupCount) || (b.students - a.students)).slice(0, 5);
+
+    if (!records.length) {
+      return this.emptyState("O'qituvchilar topilmadi");
+    }
+
+    return `
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        ${records.map((record) => `
+          <div class="card card-sm">
+            <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;">
+              <div>
+                <div style="font-weight:700;">${this.escapeHtml(record.teacher.name)}</div>
+                <div style="font-size:13px;color:var(--text3);">${this.escapeHtml(record.groupCount + " ta guruh")} • ${this.escapeHtml(record.students + " o'quvchi")}</div>
+              </div>
+              <span class="badge badge-primary">${this.escapeHtml(EduCoin.formatCoins(record.teacher.coins || 0))}</span>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  },
+
+  renderShopWatch(ctx) {
+    const lowStock = [...ctx.shopItems].sort((a, b) => (a.stock || 0) - (b.stock || 0)).slice(0, 5);
+
+    if (!lowStock.length) {
+      return this.emptyState("Faol mahsulotlar topilmadi");
+    }
+
+    return `
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        ${lowStock.map((item) => `
+          <div class="card card-sm">
+            <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;">
+              <div>
+                <div style="font-weight:700;">${this.escapeHtml(item.name)}</div>
+                <div style="font-size:13px;color:var(--text3);">${this.escapeHtml(item.category || 'Umumiy')} • ${this.escapeHtml(EduCoin.formatCoins(item.price || 0))}</div>
+              </div>
+              <span class="badge ${item.stock <= 3 ? 'badge-danger' : 'badge-primary'}">${this.escapeHtml(`${item.stock} ta`)}</span>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  },
+
+  renderReportsSummary(ctx) {
+    const latestReports = [...ctx.reports].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 4);
+
+    if (!latestReports.length) {
+      return this.emptyState('Hisobotlar hali yaratilmagan');
+    }
+
+    return `
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        ${latestReports.map((report) => `
+          <div class="card card-sm">
+            <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;">
+              <div>
+                <div style="font-weight:700;">${this.escapeHtml(report.title)}</div>
+                <div style="font-size:13px;color:var(--text3);">${this.escapeHtml(report.period || EduCoin.formatDate(report.createdAt))}</div>
+              </div>
+              <span class="badge badge-primary">${this.escapeHtml(report.type)}</span>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;font-size:13px;color:var(--text2);">
+              <span>${this.escapeHtml(`Award: ${report.totalCoinsAwarded}`)}</span>
+              <span>${this.escapeHtml(`Purchase: ${report.totalPurchases}`)}</span>
+              <span>${this.escapeHtml(`Transfer: ${report.totalTransfers}`)}</span>
+            </div>
+          </div>
+        `).join('')}
       </div>
     `;
   },
@@ -394,25 +608,37 @@ const RoleDashboard = {
       default:
         return {
           heroTitle: `Salom, ${firstName}`,
-          heroText: `${ctx.users.length} faol foydalanuvchi va ${ctx.transactions.length} ta tranzaksiya nazorat ostida.`,
+          heroText: `${ctx.users.length} faol foydalanuvchi, ${ctx.groups.length} ta guruh va ${ctx.shopItems.length} ta mahsulot admin nazoratida.`,
           heroAction: commonAwardAction,
           stats: [
             { icon: 'users', label: 'Foydalanuvchilar', value: `${ctx.users.length}`, note: 'Faol', background: 'rgba(244,67,54,0.12)', color: '#F44336' },
+            { icon: 'award', label: "O'quvchilar", value: `${ctx.students.length}`, note: 'Reytingda', background: 'rgba(0,255,136,0.12)', color: 'var(--success)' },
+            { icon: 'groups', label: "O'qituvchilar", value: `${ctx.teachers.length}`, note: 'Faol', background: 'rgba(33,150,243,0.12)', color: '#2196F3' },
+            { icon: 'chart', label: 'Guruhlar', value: `${ctx.groups.length}`, note: 'Tuzilgan', background: 'rgba(156,39,176,0.12)', color: '#9C27B0' },
             { icon: 'coin', label: 'Muomaladagi coin', value: `${ctx.users.reduce((sum, user) => sum + Number(user.coins || 0), 0).toLocaleString()}`, note: 'Jami', background: 'rgba(255,215,0,0.12)', color: 'var(--coin)' },
-            { icon: 'trending', label: 'Tranzaksiyalar', value: `${ctx.transactions.length}`, note: 'So\'nggi 50', background: 'rgba(33,150,243,0.12)', color: '#2196F3' },
-            { icon: 'shopping', label: 'Xaridlar', value: `${ctx.purchases.length}`, note: "Do'kon", background: 'rgba(255,152,0,0.12)', color: '#FF9800' },
+            { icon: 'shopping', label: "Do'kon", value: `${ctx.shopItems.length}`, note: 'Faol mahsulot', background: 'rgba(255,152,0,0.12)', color: '#FF9800' },
+            { icon: 'trending', label: 'Hisobotlar', value: `${ctx.reports.length}`, note: 'Saqlangan', background: 'rgba(0,229,204,0.12)', color: 'var(--info)' },
           ],
           quickActions: [
-            { icon: 'users', label: 'Users', note: 'Boshqaruv sahifasi', href: 'users.html' },
-            { icon: 'database', label: 'Database', note: 'Ma\'lumotlar ombori', href: 'database.html' },
+            { icon: 'coins', label: 'EduCoinlar', note: 'Coin markazi', href: 'coins.html' },
+            { icon: 'rating', label: 'Reyting', note: 'Top studentlar', href: 'rating.html' },
             { icon: 'shop', label: "Do'kon", note: 'Mahsulotlar', href: 'shop.html' },
+            { icon: 'users', label: 'Userlar', note: 'Boshqaruv sahifasi', href: 'users.html' },
+            { icon: 'reports', label: 'Hisobotlar', note: 'Tahlil oynasi', href: 'reports.html' },
+            { icon: 'database', label: 'Database', note: 'Ma\'lumotlar ombori', href: 'database.html' },
+            { icon: 'passwords', label: 'Parollar', note: 'Kirish ma\'lumotlari', href: 'passwords.html' },
+            { icon: 'profile', label: 'Profil', note: 'Admin akkaunti', href: 'profile.html' },
             { icon: 'settings', label: 'Sozlamalar', note: 'Tizim parametrlari', href: 'settings.html' },
           ],
           panels: [
-            this.panel('Rollar taqsimoti', this.renderRoleBreakdown(ctx.users)),
-            this.panel("So'nggi tranzaksiyalar", this.renderTransactionList(ctx.transactions.slice(0, 6))),
-            this.panel('Haftalik oqim', this.renderWeeklyBars(ctx.weekly)),
-            this.panel('Eng faol foydalanuvchilar', this.renderLeaderboard([...ctx.users].sort((a, b) => (b.coins || 0) - (a.coins || 0)).slice(0, 5), ctx.groups)),
+            this.panel('Rol markazi', this.renderRoleHub(ctx)),
+            this.panel('Coin markazi', this.renderCoinCenter(ctx), `<a class="btn btn-sm btn-secondary" href="coins.html">Barchasi</a>`),
+            this.panel("Top o'quvchilar", this.renderLeaderboard(topStudents, ctx.groups), `<a class="btn btn-sm btn-secondary" href="rating.html">Barchasi</a>`),
+            this.panel("Ustoz va guruh yuklamasi", this.renderTeacherLoad(ctx)),
+            this.panel("Do'kon nazorati", this.renderShopWatch(ctx), `<a class="btn btn-sm btn-secondary" href="shop.html">Barchasi</a>`),
+            this.panel("So'nggi tranzaksiyalar", this.renderTransactionList(ctx.transactions.slice(0, 6)), `<a class="btn btn-sm btn-secondary" href="coins.html">Coin markazi</a>`),
+            this.panel('Hisobotlar oynasi', this.renderReportsSummary(ctx), `<a class="btn btn-sm btn-secondary" href="reports.html">Barchasi</a>`),
+            this.panel("Yangi foydalanuvchilar", this.renderUserDirectory([...ctx.users].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 6)), `<a class="btn btn-sm btn-secondary" href="users.html">Boshqarish</a>`),
           ],
           awardTargets,
         };
@@ -461,18 +687,25 @@ const RoleDashboard = {
   render() {
     const ctx = this.getContext();
     const model = this.getModel(ctx);
+    const panelRows = [];
+    for (let index = 0; index < model.panels.length; index += 2) {
+      panelRows.push(`
+        <div class="grid grid-2" style="margin-bottom:${index + 2 < model.panels.length ? '24px' : '0'};">
+          ${model.panels.slice(index, index + 2).join('')}
+        </div>
+      `);
+    }
     return `
-      <div class="page-header">
+      <div class="page-header ${model.heroCompact ? 'page-header-compact' : ''}">
         <div>
           <h1>${this.escapeHtml(model.heroTitle)}</h1>
           <p>${this.escapeHtml(model.heroText)}</p>
         </div>
         <div style="display:flex;gap:12px;flex-wrap:wrap;">${model.heroAction}</div>
       </div>
-      ${this.renderQuickActions(model.quickActions)}
+      ${this.renderQuickActions(model.quickActions, Boolean(model.quickActionsCompact))}
       <div class="grid grid-4" style="margin-bottom:24px;">${model.stats.map((stat) => this.statCard(stat)).join('')}</div>
-      <div class="grid grid-2" style="margin-bottom:24px;">${model.panels.slice(0, 2).join('')}</div>
-      <div class="grid grid-2">${model.panels.slice(2).join('')}</div>
+      ${panelRows.join('')}
       ${this.renderAwardModal(model.awardTargets)}
     `;
   },

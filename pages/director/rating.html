@@ -3,55 +3,112 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="EduCoin — ta'lim mukofot tizimi">
+  <meta name="description" content="EduCoin reytingi">
   <meta name="theme-color" content="#050A05">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <title>EduCoin — Reyting</title>
+  <title>EduCoin - Reyting</title>
   <link rel="stylesheet" href="../../css/style.css">
   <link rel="stylesheet" href="../../css/dashboard.css">
 </head>
-<body>
+<body class="blur-on">
   <div class="app-layout">
     <div id="sidebar-container"></div>
     <div class="main-content">
       <header class="topbar">
-        <div style="display:flex;align-items:center;gap:12px">
-          <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
-          <div class="topbar-title">🏆 Reyting</div>
+        <div class="topbar-left">
+          <button class="hamburger" aria-label="Menyu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <div>
+            <div class="topbar-title" id="pageTopbarTitle">Reyting</div>
+            <div class="market-topbar-subtitle" id="pageTopbarSubtitle">Reyting yuklanmoqda</div>
+          </div>
         </div>
-        <div class="topbar-right"><div class="coin-display" id="topCoinDisplay">🪙 0</div></div>
+        <div class="topbar-right">
+          <div class="coin-display" id="topCoinDisplay">0 coin</div>
+        </div>
       </header>
+
       <div class="page-content">
-        <div class="page-header"><div><h1>🏆 O'quvchilar reytingi</h1><p>Coin miqdori bo'yicha tartib</p></div></div>
-        <div class="card">
-          <div id="leaderboard"></div>
-        </div>
+        <section class="rating-hero">
+          <div class="market-kicker">Leaderboard</div>
+          <h1 id="ratingHeroTitle">EduCoin reytingi</h1>
+          <p id="ratingHeroSubtitle">Student natijalarini bir joyda ko'ring va umumiy tendensiyani kuzating.</p>
+        </section>
+
+        <section class="rating-summary-grid" id="ratingSummaryGrid"></section>
+
+        <section class="grid grid-2 rating-overview-grid">
+          <div class="card">
+            <div class="card-toolbar">
+              <div>
+                <div class="card-title">Top 3</div>
+                <div class="users-section-desc">Hozirgi yetakchilar</div>
+              </div>
+            </div>
+            <div class="rating-podium" id="ratingPodium"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-toolbar">
+              <div>
+                <div class="card-title" id="ratingHighlightTitle">Joriy lider</div>
+                <div class="users-section-desc">Umumiy leaderboard snapshot</div>
+              </div>
+            </div>
+            <div class="rating-highlight" id="ratingHighlight"></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="market-toolbar">
+            <div class="search-bar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="7"></circle>
+                <line x1="20" y1="20" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="ratingSearchInput" placeholder="Ism, username yoki guruh bo'yicha qidiring...">
+            </div>
+            <select class="form-control" id="ratingGroupFilter"></select>
+            <select class="form-control" id="ratingLimitFilter">
+              <option value="10">Top 10</option>
+              <option value="20" selected>Top 20</option>
+              <option value="50">Top 50</option>
+              <option value="all">Hammasi</option>
+            </select>
+          </div>
+          <div class="card-toolbar market-toolbar-meta">
+            <div class="users-section-desc" id="ratingFilterHint">Barcha o'quvchilar ko'rsatilmoqda</div>
+            <span class="badge badge-primary" id="ratingResultCount">0 ta</span>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="rating-list" id="leaderboardList"></div>
+        </section>
       </div>
     </div>
   </div>
+
   <script src="../../js/auth.js"></script>
   <script src="../../js/main.js"></script>
+  <script src="../../js/rating-page.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-      await EduCoin.init();
-      const user = EduCoin.requireAuth(['teacher','manager','director','admin']);
-      if (!user) return;
-      document.getElementById('sidebar-container').innerHTML = buildSidebar(user.role, user);
-      document.getElementById('topCoinDisplay').textContent = `🪙 ${(user.coins||0).toLocaleString()}`;
-      const lb = EduCoin.getLeaderboard();
-      const groups = EduCoin.getGroups();
-      const emojis = ['🥇','🥈','🥉'];
-      document.getElementById('leaderboard').innerHTML = lb.length ? lb.map((u,i)=>{
-        const g = groups.find(gr=>gr.studentIds.includes(u.id));
-        return `<div class="leaderboard-item">
-          <div class="rank-num ${i<3?'rank-'+(i+1):'rank-other'}">${i<3?emojis[i]:i+1}</div>
-          <div class="leader-avatar">${getInitials(u.name)}</div>
-          <div class="leader-info"><div class="leader-name">${u.name}</div><div class="leader-group">${g?g.name:'—'}</div></div>
-          <div class="leader-coins">${(u.coins||0).toLocaleString()} 🪙</div>
-        </div>`;
-      }).join('') : '<div class="empty-state"><div class="icon">🏅</div><p>O\'quvchilar yo\'q</p></div>';
+    document.addEventListener('DOMContentLoaded', () => {
+      initRatingPage({
+        allowedRoles: ['director'],
+        mode: 'staff',
+        topbarTitle: 'Reyting',
+        heroTitle: "Direktor reyting ko'rinishi",
+        heroSubtitle: "Top studentlar, umumiy coin dinamikasi va guruhlar kesimidagi leaderboard ko'rinishi.",
+        highlightTitle: 'Joriy lider',
+      });
     });
   </script>
 </body>

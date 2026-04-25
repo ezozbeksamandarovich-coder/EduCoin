@@ -31,8 +31,8 @@
 
         <div class="grid grid-4" style="margin-bottom:24px">
           <div class="stat-card"><div class="stat-icon" style="background:rgba(255,215,0,0.15)">🪙</div><div class="stat-info"><div class="label">Jami coinlar</div><div class="value" id="s1">0</div></div></div>
-          <div class="stat-card"><div class="stat-icon" style="background:rgba(67,233,123,0.15)">🎒</div><div class="stat-info"><div class="label">Faol o'quvchilar</div><div class="value" id="s2">0</div></div></div>
-          <div class="stat-card"><div class="stat-icon" style="background:rgba(33,150,243,0.15)">📚</div><div class="stat-info"><div class="label">Faol o'qituvchilar</div><div class="value" id="s3">0</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:rgba(67,233,123,0.15)">👥</div><div class="stat-info"><div class="label">Faol foydalanuvchi</div><div class="value" id="s2">0</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:rgba(33,150,243,0.15)">🛡️</div><div class="stat-info"><div class="label">Faol admin</div><div class="value" id="s3">0</div></div></div>
           <div class="stat-card"><div class="stat-icon" style="background:rgba(255,107,107,0.15)">🛒</div><div class="stat-info"><div class="label">Jami xaridlar</div><div class="value" id="s4">0</div></div></div>
         </div>
 
@@ -61,12 +61,12 @@
       </div>
     </div>
   </div>
-  <script src="../../js/auth.js"></script>
-  <script src="../../js/main.js"></script>
+  <script src="../../js/auth.js?v=20260413f"></script>
+  <script src="../../js/main.js?v=20260413f"></script>
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
       await EduCoin.init();
-      const user = EduCoin.requireAuth(['manager','director','admin']);
+      const user = EduCoin.requireAuth(['admin']);
       if (!user) return;
       document.getElementById('sidebar-container').innerHTML = buildSidebar(user.role, user);
       document.getElementById('topCoinDisplay').textContent = `🪙 ${(user.coins||0).toLocaleString()}`;
@@ -76,9 +76,10 @@
     function loadStats() {
       const txns = EduCoin.getTransactions();
       const purchases = EduCoin.getData('purchases')||[];
-      document.getElementById('s1').textContent = txns.filter(t=>t.type==='award').reduce((s,t)=>s+t.amount,0).toLocaleString();
-      document.getElementById('s2').textContent = EduCoin.getUsersByRole('student').filter(u=>u.active).length;
-      document.getElementById('s3').textContent = EduCoin.getUsersByRole('teacher').filter(u=>u.active).length;
+      const users = EduCoin.getUsers().filter((u) => u.active);
+      document.getElementById('s1').textContent = users.reduce((sum, u) => sum + Number(u.coins || 0), 0).toLocaleString();
+      document.getElementById('s2').textContent = users.length;
+      document.getElementById('s3').textContent = EduCoin.getUsersByRole('admin').filter(u=>u.active).length;
       document.getElementById('s4').textContent = purchases.length;
       document.getElementById('totalAward').textContent = txns.filter(t=>t.type==='award').reduce((s,t)=>s+t.amount,0).toLocaleString();
       document.getElementById('totalTransfer').textContent = txns.filter(t=>t.type==='transfer').reduce((s,t)=>s+t.amount,0).toLocaleString();
